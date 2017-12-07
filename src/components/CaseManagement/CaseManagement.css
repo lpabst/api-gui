@@ -1,0 +1,46 @@
+
+.case_management{
+    width: 100%;
+    position: relative;
+    padding-top: 70px;
+}
+
+/* Form Section */
+.case_management_top{
+    width: 100%;
+    min-height: 600px;
+    height: 70vh;
+    position: relative;
+    background: #8ac452;
+}
+
+.case_management h2{
+    width: 100%;
+    text-align: center;
+    position: absolute;
+    top: calc(50% - 220px);
+}
+
+/* Styling for the table cells */
+#root > div > div.case_management > div.response_data_results > div > table > tbody > tr > td{
+    border: 1px solid black;
+    padding: 3px 3px 3px 3px;
+}
+
+#root > div > div.case_management > div.response_data_results > div > table > tbody > tr > td{
+    border: 1px solid black;
+    padding: 3px 3px 3px 3px;
+}
+
+#root > div > div.case_management > div.response_data_results > div > table > tbody > tr > td{
+    border: 1px solid black;
+    padding: 3px 3px 3px 3px;
+}
+
+#root > div > div.case_management > div.response_data_results > div > table > tbody > tr:nth-child(even){
+    background: #ccc;
+}
+
+#root > div > div.case_management > div.response_data_results > div > table > tbody > tr:nth-child(odd){
+    background: #eee;
+}

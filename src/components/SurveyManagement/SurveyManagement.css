@@ -1,0 +1,105 @@
+
+.survey_management{
+    width: 100%;
+    position: relative;
+    padding-top: 70px;
+}
+
+.survey_management h2{
+    width: 100%;
+    text-align: center;
+    position: absolute;
+    top: calc(50% - 220px);
+}
+
+.login{
+    width: 400px;
+    height: 250px;
+    position: absolute;
+    left: calc(50% - 200px);
+    top: calc(50% - 160px);
+    padding: 15px 15px;
+    border-radius: 5px;
+    background: #999;
+    box-shadow: 2px 2px 4px black;
+}
+
+.login p{
+    margin: 12px 0px 2px 0px;
+}
+
+.login input{
+    width: 350px;
+    height: 20px;
+    line-height: 20px;
+    padding-left: 3px;
+}
+
+/* Styling for the table cells */
+#root > div > div.survey_management > div.response_data_results > ul > table > tbody > tr > td{
+    border: 1px solid black;
+    padding: 3px 3px 3px 3px;
+}
+
+#root > div > div.survey_management > div.response_data_results > ul > table > tbody > tr > table > tbody > tr > td{
+    border: 1px solid black;
+    padding: 3px 3px 3px 3px;
+}
+
+#root > div > div.survey_management > div.response_data_results > ul > table > tbody > tr > td{
+    border: 1px solid black;
+    padding: 3px 3px 3px 3px;
+}
+
+#root > div > div.survey_management > div.response_data_results > ul > table > tbody > tr:nth-child(even){
+    background: #ccc;
+}
+
+#root > div > div.survey_management > div.response_data_results > ul > table > tbody > tr:nth-child(odd){
+    background: #eee;
+}
+
+/* Forms CSS */
+.recipients_selectors{
+    width: 210px;
+    position: absolute;
+    right: 78px;
+    top: 151px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.recipients_selectors div{
+    padding: 3px 5px;
+    cursor: pointer;
+    border: 1px solid black;
+    background: linear-gradient(#eee, #bbb);
+    font-size: 12px;
+    border-radius: 3px;
+}
+
+.recipients_selectors div:active{
+    box-shadow: inset 1px 1px 1px black;
+    background: linear-gradient(#bbb, #eee);
+}
+
+.email_input{
+    margin-top: 5px;
+    width: 300px !important;
+}
+
+.prepop_list{
+    width: 310px;
+    height: 125px;
+}
+
+.prepop_list div{
+    width: 150px;
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.prepop_input{
+    width: 145px !important;
+    margin-top: 6px;
+}

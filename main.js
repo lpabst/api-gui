@@ -1,7 +1,7 @@
 'use strict';
 
 // Import parts of electron to use
-const {app, BrowserWindow} = require('electron');
+const {app, BrowserWindow, ipcMain} = require('electron');
 const path = require('path')
 const url = require('url')
 
@@ -18,8 +18,9 @@ if ( process.defaultApp || /[\\/]electron-prebuilt[\\/]/.test(process.execPath) 
 function createWindow() {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 1024, height: 768, show: false
+    width: 1300, height: 900, show: false
   });
+  // mainWindow.maximize();
 
   // and load the index.html of the app.
   let indexPath;
@@ -78,3 +79,30 @@ app.on('activate', () => {
     createWindow();
   }
 });
+
+
+//////////Endpoints for the front end
+var userController = require("./server/userController.js");
+var responseDataController = require("./server/responseDataController.js");
+var surveyManagementController = require("./server/surveyManagementController.js");
+var caseManagementController = require("./server/caseManagementController.js");
+
+//Common Endpoints For All/Multiple APIs
+ipcMain.on('/api/authenticate', userController.authenticateUser);
+ipcMain.on('/api/getSurveyList', userController.getSurveyList);
+
+//Response Data API
+ipcMain.on('/api/getQuestionsBySurveyId', responseDataController.getQuestionsBySurveyId);
+ipcMain.on('/api/getAnswersBySurveyId', responseDataController.getAnswersBySurveyId);
+ipcMain.on('/api/getResponsesBySurveyId', responseDataController.getResponsesBySurveyId);
+
+//Survey Management API
+ipcMain.on('/api/sendInvitationForNewRecipients', surveyManagementController.sendInvitationForNewRecipients);
+ipcMain.on('/api/getEmailListsBySurveyId', surveyManagementController.getEmailListsBySurveyId);
+ipcMain.on('/api/getOptOuts', surveyManagementController.getOptOuts);
+
+//Case Management API
+ipcMain.on('/api/getCaseView', caseManagementController.getCaseView);
+ipcMain.on('/api/getMessages', caseManagementController.getMessages);
+ipcMain.on('/api/getUserList', caseManagementController.getUserList);
+
