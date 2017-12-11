@@ -1,8 +1,8 @@
 {
-  "name": "MaritzCX_API_GUI",
+  "name": "MaritzCX_API_GUI-v.1.0",
   "version": "0.7.0",
   "description": "Minimal and modern react+electron+webpack boilerplate",
-  "author": "Phillip Barbiero",
+  "author": "App by Loren Pabst, biolerplate by Phillip Barbiero",
   "homepage": "https://github.com/pbarbiero/basic-electron-react-boilerplate",
   "repository": {
     "type": "git",
