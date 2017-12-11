@@ -219,7 +219,8 @@ class SurveyManagement extends Component {
         return alert(res.data.message);
       }
       let result = JSON.parse(res.data.SendInvitationForNewRecipientsResult);
-      if (result.Errors.length){
+      if (result && result.Errors && result.Errors.length){
+        alert(JSON.stringify(result.Errors));
         return alert('Error in sending the invite. Common causes: 1. Please make sure you are authenticated 2. Please make sure that this survey has an invite already built in the platform that it can send 3. Only one API call can be made per minute to send invites')
       }else{
         return alert('Success!')
