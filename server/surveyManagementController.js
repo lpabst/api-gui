@@ -5,7 +5,6 @@ module.exports = {
   sendInvitationForNewRecipients: (event, arg) => {
         let { url, token, surveyId, recipients, sampleDeDuplicationRule, sampleErrorHandlingRule } = arg;
         console.log({ url, token, surveyId, recipients, sampleDeDuplicationRule, sampleErrorHandlingRule });
-        console.log(recipients[0].PrepopData);
         requestify.post(url, { token, surveyId, recipients, sampleDeDuplicationRule, sampleErrorHandlingRule })
         .then(
           function(response){

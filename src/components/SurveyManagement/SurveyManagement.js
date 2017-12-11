@@ -194,12 +194,13 @@ class SurveyManagement extends Component {
       for (var i = 0; i < recipients.length; i++){
         recipients[i].PrepopData = prepop;
       }
-      console.log(prepop);
+      // console.log(prepop);
+      
       //now that we have the scale Id's, send the invites out
       console.log('Sending Invites to new recipients')
       console.log(recipients);
       this.ipcRenderer.send(`/api/sendInvitationForNewRecipients`, {
-        "url": `${this.baseURL}/EmailImport.HttpService.svc/web/sendInvitationForNewRecipients`,
+        "url": `${this.baseURL}/HttpService.svc/web/sendInvitationForNewRecipients`,
         "token": this.state.token,
         "surveyId": this.state.surveyId,
         "recipients": recipients,
