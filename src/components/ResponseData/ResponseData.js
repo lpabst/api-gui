@@ -60,6 +60,7 @@ class ResponseData extends Component {
   componentDidMount(){
     window.scrollTo(0, 0);
     this.mounted = true;
+    document.getElementById('username').focus();
     
     //This sets the event listeners from responses from the back end
     this.ipcRenderer.on('authenticateUserResult', (event, res) => {
@@ -84,9 +85,9 @@ class ResponseData extends Component {
       if (!this.mounted) return;
 
       this.setLoading(false);
-      console.log(res)
+      
       if (!res.data || !res.data.GetSurveyListResult){
-        return alert(res.data);
+        return alert(JSON.stringify(res));
       }
       this.setState({
         surveyList: res.data.GetSurveyListResult
@@ -386,7 +387,7 @@ class ResponseData extends Component {
       formToShow =  <form className='login' onSubmit={this.authenticateUser} >
                       <h4 style={{width: '100%', textAlign: 'center'}}>authenticate</h4>
                       <p>Username/Email:</p>
-                      <input placeholder='username' value={this.props.username} onChange={(e) => this.props.updateReduxState(e.target.value, 'username')} />
+                      <input placeholder='username' value={this.props.username} onChange={(e) => this.props.updateReduxState(e.target.value, 'username')} id='username' />
                       <p>Password:</p>
                       <input placeholder='password' value={this.props.password} onChange={(e) => this.props.updateReduxState(e.target.value, 'password')} type='password' />
                       <p>Company URL: (ex: company.allegiancetech.com)</p>
