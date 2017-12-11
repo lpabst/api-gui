@@ -169,18 +169,18 @@ class SurveyManagement extends Component {
       arr.shift();
       let prepop = this.state.prepopData.slice();
       for (let i = 0; i < prepop.length; i++){
-            for (let k = 0; k < arr.length; k++){
-              let questionId = arr[k].match(/<QuestionId>/) ? arr[k].split('<QuestionId>')[1].split('</QuestionId>')[0] : 'None';
-              let questionShortCode = arr[k].match(/<QuestionShortCode>/) ? arr[k].split('<QuestionShortCode>')[1].split('</QuestionShortCode>')[0] : 'None';
-              if (questionShortCode == prepop[i].ScaleId){
-                prepop[i].ScaleId = questionId;
-              }
-            }
+        for (let k = 0; k < arr.length; k++){
+          let questionId = arr[k].match(/<QuestionId>/) ? arr[k].split('<QuestionId>')[1].split('</QuestionId>')[0] : 'None';
+          let questionShortCode = arr[k].match(/<QuestionShortCode>/) ? arr[k].split('<QuestionShortCode>')[1].split('</QuestionShortCode>')[0] : 'None';
+          if (questionShortCode == prepop[i].ScaleId){
+            prepop[i].ScaleId = questionId;
+          }
+        }
       }
 
       //Error handling checks if any question tag's weren't able to convert to Scale ID
       for (let i = 0; i < prepop.length; i++){
-        if (Number(prepop[i].ScaleId) != prepop[i].ScaleId){
+        if (prepop[i].ScaleId && Number(prepop[i].ScaleId) != prepop[i].ScaleId){
           this.setLoading(false);
           return alert('Unable to find a question in the survey with the question tag listed in prepop #' + (i+1) + ' (failed to send). **Note: The question tag listed here is case sensitive, double check your spelling and capitalizations.');
         }
@@ -265,10 +265,10 @@ class SurveyManagement extends Component {
 
   updateState(e, key){
     var newState = Object.assign({}, this.state);
-    console.log(newState);
-    console.log(e.target.value);
+    // console.log(newState);
+    // console.log(e.target.value);
     newState[key] = e.target.value;
-    console.log(newState);
+    // console.log(newState);
     this.setState(newState);
   }
 
