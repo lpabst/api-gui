@@ -28,6 +28,7 @@ import {updateReduxState} from './../../ducks/reducer.js';
 
 // import server from the backend for "API" calls
 import {ipcRenderer, remote} from 'electron';
+import { prependOnceListener } from 'cluster';
 
 class SurveyManagement extends Component {
 
@@ -183,15 +184,17 @@ class SurveyManagement extends Component {
         if (prepop[i].ScaleId && Number(prepop[i].ScaleId) != prepop[i].ScaleId){
           this.setLoading(false);
           return alert('Unable to find a question in the survey with the question tag listed in prepop #' + (i+1) + ' (failed to send). **Note: The question tag listed here is case sensitive, double check your spelling and capitalizations.');
+        }else if (!prepop[i].ScaleId){
+          prepop.splice(i--, 1);
         }
       }
 
       //Add prepop data to email invites
       let recipients = this.state.recipients.slice();
       for (var i = 0; i < recipients.length; i++){
-        recipients[i].PrepopData = this.state.prepopData;
+        recipients[i].PrepopData = prepop;
       }
-      
+      console.log(prepop);
       //now that we have the scale Id's, send the invites out
       console.log('Sending Invites to new recipients')
       console.log(recipients);
