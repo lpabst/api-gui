@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import './ResponseData.css';
 import questionsHelp from './../../media/questionsHelp.png';
-import answersHelp from './../../media/questionsHelp.png';
-import responsesHelp from './../../media/questionsHelp.png';
+import answersHelp from './../../media/answersHelp.png';
+import responsesHelp from './../../media/responsesHelp.png';
 
 //Loading Gif
 import LoadingGif from './../Common/LoadingGif.js';
