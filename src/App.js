@@ -7,6 +7,10 @@ import './App.css';
 
 class App extends Component {
 
+  componentDidMount(){
+    document.getElementById('response-data').click();
+  }
+
   scrollUp(){
     window.scroll({
       top: 0,
@@ -22,7 +26,7 @@ class App extends Component {
         <div className='desktop_header'>
           <img src='https://www.maritzcx.com/wp-content/themes/allegiance/images/logo.svg' className='header_logo' alt='header logo' onClick={this.scrollUp} />
           <ul>
-            <Link to='/response-data'>Response Data</Link>
+            <Link to='/response-data' id='response-data'>Response Data</Link>
             <Link to='/survey-management'>Survey Management</Link>
             <Link to='/case-management'>Case Management</Link>
           </ul>

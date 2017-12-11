@@ -10,8 +10,7 @@ import {connect} from 'react-redux';
 import {updateReduxState} from './../../ducks/reducer.js';
 
 // import server from the backend for "API" calls
-const {ipcRenderer, remote} = require('electron');  
-const server = remote.require("./main.js");
+import {ipcRenderer, remote} from 'electron';
 
 class CaseManagement extends Component {
 
@@ -51,6 +50,9 @@ class CaseManagement extends Component {
       showLoadingGif: false
     }
 
+    this.ipcRenderer = ipcRenderer;
+    this.remote = remote;
+
     this.changeForm = this.changeForm.bind(this);
     this.updateState = this.updateState.bind(this);
     this.setLoading = this.setLoading.bind(this);
@@ -62,6 +64,59 @@ class CaseManagement extends Component {
   
   componentDidMount(){
     window.scrollTo(0, 0);
+    this.mounted = true;
+
+    //This sets the event listeners for the respones from the back end
+    this.ipcRenderer.on('authenticateUserResult', (event, res) => {
+      if (!this.mounted) return;
+
+      this.setLoading(false);
+      if (!res.data || !res.data.AuthenticateResult){
+        console.log(res);
+        return alert('Error, no Auth token came back. Please check your spelling')
+      }
+      console.log(res);
+      this.setState({
+        authResult: res.data.AuthenticateResult,
+        token: res.data.AuthenticateResult.token
+      })
+    })
+    
+    this.ipcRenderer.on('getCaseViewResult', (event, res) => {
+      if (!this.mounted) return;
+      
+      this.setLoading(false);
+      console.log(res);
+    })
+
+    this.ipcRenderer.on('getMessagesResult', (event, res) => {
+      if (!this.mounted) return;
+      
+      this.setLoading(false);
+      console.log(res);
+    })
+    
+    this.ipcRenderer.on('getUserListResult', (event, res) => {
+      if (!this.mounted) return;
+      
+      this.setLoading(false);
+      console.log(res);
+      if (!res.data || !res.data.GetUserListResult || res.data.GetUserListResult.statusMessage.match(/Error/)){
+        return alert('Error occurred. Please check you are logged in and passing the correct auth token!')
+      }else if (res.data.GetUserListResult.totalSearchCount == '0'){
+        return alert('Zero users returned for that search. Try adjusting the search term or turning off case sensitivity');
+      }else{
+        this.setState({
+          totalSearchCount: res.data.GetUserListResult.totalSearchCount,
+          userList: res.data.GetUserListResult.userAccount
+        })
+      }
+    })
+
+  }
+
+  componentWillUnmount(){
+    this.mounted = false;
   }
 
   changeForm(newVal){
@@ -84,86 +139,56 @@ class CaseManagement extends Component {
 
   authenticateUser(e){
     e.preventDefault();
+
     var baseURL = this.state.baseURL[this.props.server];
     this.setLoading(true);
 
-    ipcRenderer.send(`/api/authenticate`, {
+    this.ipcRenderer.send(`/api/authenticate`, {
       "url": `${baseURL}/authenticate`,
       "userName": this.props.username,
       "password": this.props.password,
       "companyName": this.props.company
     })
-    ipcRenderer.on('authenticateUserResult', (event, res) => {
-      this.setLoading(false);
-      if (!res.data.AuthenticateResult){
-        console.log(res);
-        return alert('Error, no Auth token came back. Please check your spelling')
-      }
-      console.log(res);
-      this.setState({
-        authResult: res.data.AuthenticateResult,
-        token: res.data.AuthenticateResult.token
-      })
-    })
   }
 
   getCaseView(e){
     e.preventDefault();
+
     var baseURL = this.state.baseURL[this.props.server];
     this.setLoading(true);
 
-    ipcRenderer.send(`/api/getCaseView`, {
+    this.ipcRenderer.send(`/api/getCaseView`, {
       "url": `${baseURL}/getCaseView`,
       "token": this.state.token,
       "caseId": parseInt(this.state.caseId, 10)
-    })
-    ipcRenderer.on('getCaseViewResult', (event, res) => {
-      this.setLoading(false);
-      console.log(res);
     })
   }
 
   getMessages(e){
     e.preventDefault();
+
     var baseURL = this.state.baseURL[this.props.server];
     this.setLoading(true);
 
-    ipcRenderer.send(`/api/getMessages`, {
+    this.ipcRenderer.send(`/api/getMessages`, {
       "url": `${baseURL}/getMessages`,
       "token": this.state.token,
       "caseId": parseInt(this.state.caseId, 10)
-    })
-    ipcRenderer.on('getMessagesResult', (event, res) => {
-      this.setLoading(false);
-      console.log(res);
     })
   }
 
   getUserList(e){
     e.preventDefault();
+
     var baseURL = this.state.baseURL[this.props.server];
     let caseSensitiveSearch = (this.state.caseSensitiveSearch === 'Yes') ? true : false
     this.setLoading(true);
 
-    ipcRenderer.send(`/api/getUserList`, {
+    this.ipcRenderer.send(`/api/getUserList`, {
       "url": `${baseURL}/getUserList`,
       "token": this.state.token,
       "searchTerm": this.state.searchTerm,
       "caseSensitiveSearch": caseSensitiveSearch
-    })
-    ipcRenderer.on('getUserListResult', (event, res) => {
-      this.setLoading(false);
-      console.log(res);
-      if (res.data.GetUserListResult.statusMessage.match(/Error/)){
-        return alert('Error occurred. Please check you are logged in and passing the correct auth token!')
-      }else if (res.data.GetUserListResult.totalSearchCount == '0'){
-        return alert('Zero users returned for that search. Try adjusting the search term or turning off case sensitivity');
-      }else{
-        this.setState({
-          totalSearchCount: res.data.GetUserListResult.totalSearchCount,
-          userList: res.data.GetUserListResult.userAccount
-        })
-      }
     })
   }
 

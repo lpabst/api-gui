@@ -27,8 +27,7 @@ import {connect} from 'react-redux';
 import {updateReduxState} from './../../ducks/reducer.js';
 
 // import server from the backend for "API" calls
-const {ipcRenderer, remote} = require('electron');  
-const server = remote.require("./main.js");
+import {ipcRenderer, remote} from 'electron';
 
 class SurveyManagement extends Component {
 
@@ -64,6 +63,9 @@ class SurveyManagement extends Component {
       emailList: [{}],
       showLoadingGif: false
     }
+    
+    this.ipcRenderer = ipcRenderer;
+    this.remote = remote;
 
     this.changeForm = this.changeForm.bind(this);
     this.updateState = this.updateState.bind(this);
@@ -77,43 +79,12 @@ class SurveyManagement extends Component {
 
   componentDidMount(){
     window.scrollTo(0, 0);
-  }
-  
-  changeForm(newForm){
-    this.setState({
-      formToShow: newForm
-    })
-  }
+    this.mounted = true;
 
-  updateState(e, key){
-    var newState = Object.assign({}, this.state);
-    console.log(newState);
-    console.log(e.target.value);
-    newState[key] = e.target.value;
-    console.log(newState);
-    this.setState(newState);
-  }
+    //This sets all of the event listeners for the results that come from the back end
+    this.ipcRenderer.on('authenticateUserResult', (event, res) => {
+      if (!this.mounted) return;
 
-  setLoading(newVal){
-    this.setState({
-      showLoadingGif: newVal
-    })
-  }
-
-  authenticateUser(e){
-    e.preventDefault();
-    console.log('authenticating user');
-    var baseURL = this.state.baseURL[this.props.server];
-    console.log(this.props);
-    this.setLoading(true);
-
-    axios.post(`/api/authenticate`, {
-      "url": `${baseURL}/EmailImport.HttpService.svc/web/authenticate`,
-      "userName": this.props.username,
-      "password": this.props.password,
-      "companyName": this.props.company
-    })
-    .then(res => {
       this.setLoading(false);
       if (!res.data.AuthenticateResult){
         console.log(res);
@@ -128,23 +99,10 @@ class SurveyManagement extends Component {
         token: res.data.AuthenticateResult
       })
     })
-    .catch( err => {
-      this.setLoading(false);
-      return alert(err + '. Server is down.')
-    });
-  }
-  
-  getSurveyList(e){
-    e.preventDefault();
-    console.log('GetSurveyList sent')
-    var baseURL = this.state.baseURL[this.props.server];
-    this.setLoading(true);
 
-    axios.post(`/api/getSurveyList`, {
-      "url": `${baseURL}/EmailImport.HttpService.svc/web/getSurveyList`,
-      "token": this.state.token
-    })
-    .then(res => {
+    this.ipcRenderer.on('getSurveyListResult', (event, res) => {
+      if (!this.mounted) return;
+
       this.setLoading(false);
       console.log(res)
       if (!res.data.GetSurveyListResult){
@@ -154,34 +112,10 @@ class SurveyManagement extends Component {
         surveyList: res.data.GetSurveyListResult
       })
     })
-    .catch( err => {
-      this.setLoading(false);
-      return alert(err + '. Server is down.')
-    });
-  }
 
-  getOptOuts(e){
-    e.preventDefault();
-    console.log('getOptOuts sent')
-    var baseURL = this.state.baseURL[this.props.server];
+    this.ipcRenderer.on('getOptOutsResult', (event, res) => {
+      if (!this.mounted) return;
 
-    //This ensures that if the user checks opt outs for the site/domain, no surveyId is passed
-    let surveyId = this.state.sOptOutType === 'Survey' ? this.state.surveyId : null
-
-    //Pre-error handling
-    if (this.state.sOptOutType === 'Survey' && (!this.state.surveyId || Number(this.state.surveyId) <= 0)){
-      return alert('If sOptOut type is set to "Survey", a valid surveyId must be provided.')
-    }
-    
-    this.setLoading(true);
-    axios.post(`/api/getOptOuts`, {
-      "url": `${baseURL}/EmailImport.HttpService.svc/web/GetOptOuts`,
-      "token": this.state.token,
-      "sOptOutType": this.state.sOptOutType,
-      "filterXml": this.state.filterXml,
-      "surveyId": surveyId
-    })
-    .then(res => {
       this.setLoading(false);
       console.log(res)
       //Error handling
@@ -213,39 +147,11 @@ class SurveyManagement extends Component {
         optOutList: arr
       })
     })
-    .catch( err => {
-      this.setLoading(false);
-      return alert(err + '. Server is down.')
-    });
-  }
 
-  sendInvitationForNewRecipients(e){
-    e.preventDefault();
-    var baseURL = this.state.baseURL[this.props.server];
-    
-    //pre-error handling
-    if (this.state.recipients.length < 1){
-      return alert('No email addresses were entered. Please enter an email address.');
-    }
-    for (let i = 0; i < this.state.prepopData.length; i++){
-      if (this.state.prepopData[i].ScaleId && !this.state.prepopData[i].Value){
-        return alert('Prepop #' + (i+1) + ' has a question tag listed, but no value. Please include a value or delete this question tag.');
-      }
-      if (!this.state.prepopData[i].ScaleId && this.state.prepopData[i].Value){
-        return alert('Prepop #' + (i+1) + ' has a value listed, but no question tag. Please include a question tag or delete this value.');
-      }
-    }
-    
-    //Set loading screen and send axios call to get question scale ids
-    console.log('Getting Question Scale IDs...')
-    this.setLoading(true);
-    axios.post('/api/getQuestionsBySurveyId', {
-      "url": `${baseURL}/EmailImport.HttpService.svc/web/getQuestionsBySurveyId`,
-      "token": this.state.token,
-      "surveyId": this.state.surveyId,
-      "filterXml": this.state.filterXml
-    })
-    .then( res => {
+    //This one is special, because after getting the results, it actually triggers another call to the back end.
+    this.ipcRenderer.on('getQuestionsBySurveyIdResult', (event, res) => {
+      if (!this.mounted) return;
+
       //Error Handling
       if (!res.data.GetQuestionsBySurveyIdResult){
         console.log(res);
@@ -289,52 +195,36 @@ class SurveyManagement extends Component {
       //now that we have the scale Id's, send the invites out
       console.log('Sending Invites to new recipients')
       console.log(recipients);
-      axios.post(`/api/sendInvitationForNewRecipients`, {
-        "url": `${baseURL}/EmailImport.HttpService.svc/web/sendInvitationForNewRecipients`,
+      this.ipcRenderer.send(`/api/sendInvitationForNewRecipients`, {
+        "url": `${this.baseURL}/EmailImport.HttpService.svc/web/sendInvitationForNewRecipients`,
         "token": this.state.token,
         "surveyId": this.state.surveyId,
         "recipients": recipients,
         "sampleDeDuplicationRule": this.state.deDupeLegend[this.state.deDupeRule],
         "sampleErrorHandlingRule": this.state.errorHandlingLegend[this.state.errorHandlingRule]
       })
-      .then( res => {
-        console.log(res);
-        this.setLoading(false);
-        //Error handling
-        if (res.data.message){
-          return alert(res.data.message);
-        }
-        let result = JSON.parse(res.data.SendInvitationForNewRecipientsResult);
-        if (result.Errors.length){
-          return alert('Error in sending the invite. Common causes: 1. Please make sure you are authenticated 2. Please make sure that this survey has an invite already built in the platform that it can send 3. Only one API call can be made per minute to send invites')
-        }else{
-          return alert('Success!')
-        }
-      })
-      .catch( err => {
-        this.setLoading(false);
-        return alert(err + '. Server is down.')
-      });
     })
-    .catch( err => {
+
+    this.ipcRenderer.on('sendInvitationForNewRecipientsResult', (event, res) => {
+      if (!this.mounted) return;
+
+      console.log(res);
       this.setLoading(false);
-      return alert(err + '. Server is down.')
+      //Error handling
+      if (res.data.message){
+        return alert(res.data.message);
+      }
+      let result = JSON.parse(res.data.SendInvitationForNewRecipientsResult);
+      if (result.Errors.length){
+        return alert('Error in sending the invite. Common causes: 1. Please make sure you are authenticated 2. Please make sure that this survey has an invite already built in the platform that it can send 3. Only one API call can be made per minute to send invites')
+      }else{
+        return alert('Success!')
+      }
     })
-  }
+    
+    this.ipcRenderer.on('getEmailListsBySurveyIdResult', (event, res) => {
+      if (!this.mounted) return;
 
-  getEmailListsBySurveyId(e){
-    e.preventDefault();
-    console.log('Getting email list for survey# ' + this.state.surveyId);
-    var baseURL = this.state.baseURL[this.props.server];
-    this.setLoading(true);
-
-    axios.post(`/api/getEmailListsBySurveyId`, {
-      "url": `${baseURL}/EmailImport.HttpService.svc/web/getEmailListsBySurveyId`,
-      "token": this.state.token,
-      "surveyId": this.state.surveyId,
-      "filterXml": this.state.filterXml
-    })
-    .then( res => {
       console.log(res);
       this.setLoading(false);
       if (res.data.GetEmailListsBySurveyIdResult.match('Error:')){
@@ -361,10 +251,124 @@ class SurveyManagement extends Component {
         emailList: arr
       })
     })
-    .catch( err => {
-      this.setLoading(false);
-      return alert(err + '. Server is down.')
-    });
+  }
+
+  componentWillUnmount(){
+    this.mounted = false;
+  }
+  
+  changeForm(newForm){
+    this.setState({
+      formToShow: newForm
+    })
+  }
+
+  updateState(e, key){
+    var newState = Object.assign({}, this.state);
+    console.log(newState);
+    console.log(e.target.value);
+    newState[key] = e.target.value;
+    console.log(newState);
+    this.setState(newState);
+  }
+
+  setLoading(newVal){
+    this.setState({
+      showLoadingGif: newVal
+    })
+  }
+
+  authenticateUser(e){
+    e.preventDefault();
+    console.log('authenticating user');
+    var baseURL = this.state.baseURL[this.props.server];
+    console.log(this.props);
+    this.setLoading(true);
+
+    this.ipcRenderer.send(`/api/authenticate`, {
+      "url": `${baseURL}/EmailImport.HttpService.svc/web/authenticate`,
+      "userName": this.props.username,
+      "password": this.props.password,
+      "companyName": this.props.company
+    })
+  }
+  
+  getSurveyList(e){
+    e.preventDefault();
+    console.log('GetSurveyList sent')
+    var baseURL = this.state.baseURL[this.props.server];
+    this.setLoading(true);
+
+    this.ipcRenderer.send(`/api/getSurveyList`, {
+      "url": `${baseURL}/EmailImport.HttpService.svc/web/getSurveyList`,
+      "token": this.state.token
+    })
+  }
+
+  getOptOuts(e){
+    e.preventDefault();
+    console.log('getOptOuts sent')
+    var baseURL = this.state.baseURL[this.props.server];
+
+    //This ensures that if the user checks opt outs for the site/domain, no surveyId is passed
+    let surveyId = this.state.sOptOutType === 'Survey' ? this.state.surveyId : null
+
+    //Pre-error handling
+    if (this.state.sOptOutType === 'Survey' && (!this.state.surveyId || Number(this.state.surveyId) <= 0)){
+      return alert('If sOptOut type is set to "Survey", a valid surveyId must be provided.')
+    }
+    
+    this.setLoading(true);
+    this.ipcRenderer.send(`/api/getOptOuts`, {
+      "url": `${baseURL}/EmailImport.HttpService.svc/web/GetOptOuts`,
+      "token": this.state.token,
+      "sOptOutType": this.state.sOptOutType,
+      "filterXml": this.state.filterXml,
+      "surveyId": surveyId
+    })
+  }
+
+  sendInvitationForNewRecipients(e){
+    e.preventDefault();
+    var baseURL = this.state.baseURL[this.props.server];
+    this.baseURL = baseURL;
+    
+    //pre-error handling
+    if (this.state.recipients.length < 1){
+      return alert('No email addresses were entered. Please enter an email address.');
+    }
+    for (let i = 0; i < this.state.prepopData.length; i++){
+      if (this.state.prepopData[i].ScaleId && !this.state.prepopData[i].Value){
+        return alert('Prepop #' + (i+1) + ' has a question tag listed, but no value. Please include a value or delete this question tag.');
+      }
+      if (!this.state.prepopData[i].ScaleId && this.state.prepopData[i].Value){
+        return alert('Prepop #' + (i+1) + ' has a value listed, but no question tag. Please include a question tag or delete this value.');
+      }
+    }
+    
+    //Set loading screen and send axios call to get question scale ids
+    console.log('Getting Question Scale IDs...')
+    this.setLoading(true);
+    this.ipcRenderer.send('/api/getQuestionsBySurveyId', {
+      "url": `${baseURL}/EmailImport.HttpService.svc/web/getQuestionsBySurveyId`,
+      "token": this.state.token,
+      "surveyId": this.state.surveyId,
+      "filterXml": this.state.filterXml
+    })
+  }
+
+  getEmailListsBySurveyId(e){
+    e.preventDefault();
+    console.log('Getting email list for survey# ' + this.state.surveyId);
+    var baseURL = this.state.baseURL[this.props.server];
+    this.setLoading(true);
+
+    this.ipcRenderer.send(`/api/getEmailListsBySurveyId`, {
+      "url": `${baseURL}/EmailImport.HttpService.svc/web/getEmailListsBySurveyId`,
+      "token": this.state.token,
+      "surveyId": this.state.surveyId,
+      "filterXml": this.state.filterXml
+    })
   }
   
   render() {

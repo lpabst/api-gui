@@ -13,8 +13,7 @@ import {connect} from 'react-redux';
 import {updateReduxState} from './../../ducks/reducer.js';
 
 // import server from the backend for "API" calls
-const {ipcRenderer, remote} = require('electron');  
-const server = remote.require("./main.js");
+import {ipcRenderer, remote} from 'electron';
 
 class ResponseData extends Component {
 
@@ -43,6 +42,9 @@ class ResponseData extends Component {
       showLoadingGif: false
     }
 
+    this.ipcRenderer = ipcRenderer;
+    this.remote = remote;
+
     this.changeForm = this.changeForm.bind(this);
     this.updateState = this.updateState.bind(this);
     this.updateXMLBoxToShow = this.updateXMLBoxToShow.bind(this);
@@ -57,6 +59,177 @@ class ResponseData extends Component {
   
   componentDidMount(){
     window.scrollTo(0, 0);
+    this.mounted = true;
+    
+    //This sets the event listeners from responses from the back end
+    this.ipcRenderer.on('authenticateUserResult', (event, res) => {
+      if (!this.mounted) return;
+
+      this.setLoading(false);
+      if (!res.data || !res.data.AuthenticateResult){
+        console.log(res);
+        return alert('Error, no Auth token came back. Please check your spelling')
+      }
+      if (res.data.AuthenticateResult.match(/00000000/)){
+        console.log(res);
+        alert('Authentication failed. Double check your username, password, and that the company you are trying to access exists on the platform you have selected.')
+      }
+      console.log(res)
+      this.setState({
+        token: res.data.AuthenticateResult
+      })
+    })
+
+    this.ipcRenderer.on('getSurveyListResult', (event, res) => {
+      if (!this.mounted) return;
+
+      this.setLoading(false);
+      console.log(res)
+      if (!res.data || !res.data.GetSurveyListResult){
+        return alert(res.data);
+      }
+      this.setState({
+        surveyList: res.data.GetSurveyListResult
+      })
+    })
+    
+    this.ipcRenderer.on('getQuestionsBySurveyIdResult', (event, res) => {
+      if (!this.mounted) return;
+
+      this.setLoading(false);
+      if (!res.data || !res.data.GetQuestionsBySurveyIdResult){
+        console.log(res);
+        return alert(res.data);
+      }
+      if (res.data.GetQuestionsBySurveyIdResult.match(/Error:/)){
+        console.log(res);
+        return alert(res.data.GetQuestionsBySurveyIdResult);
+      }
+      let arr = res.data.GetQuestionsBySurveyIdResult.split('<Question>');
+      arr.shift();
+      console.log(arr);
+      if (arr.length < 1){
+        return alert('No questions/results returned for this query. Double check that your survey ID is correct.');
+      }
+      if (arr.length > 1000){
+        alert('The query returned ' + arr.length + ' responses, but this page will only display the first 1000. Please use the filterXML box to refine your search, or check the console for the full list of responses.')
+        arr =  arr.slice(0,1000);
+      }
+      for (var i = 0; i < arr.length; i++){
+        let item = {};
+        item.questionId = arr[i].match(/<QuestionId>/) ? arr[i].split('<QuestionId>')[1].split('</QuestionId>')[0] : 'None';
+        item.questionText = arr[i].match(/<QuestionText>/) ? arr[i].split('<QuestionText>')[1].split('</QuestionText>')[0] : 'None';
+        item.questionShortCode = arr[i].match(/<QuestionShortCode>/) ? arr[i].split('<QuestionShortCode>')[1].split('</QuestionShortCode>')[0] : 'None';
+        item.questionAlias = arr[i].match(/<QuestionAlias>/) ? arr[i].split('<QuestionAlias>')[1].split('</QuestionAlias>')[0] : 'None';
+        item.questionType = arr[i].match(/<QuestionType>/) ? arr[i].split('<QuestionType>')[1].split('</QuestionType>')[0] : 'None';
+        item.questionStatus = arr[i].match(/<QuestionStatus>/) ? arr[i].split('<QuestionStatus>')[1].split('</QuestionStatus>')[0] : 'None';
+        item.extendedType = arr[i].match(/<ExtendedType>/) ? arr[i].split('<ExtendedType>')[1].split('</ExtendedType>')[0] : 'None';
+        arr[i] = item;
+      }
+      this.setState({
+        listOfQuestionsBySurveyId: arr
+      })
+    })
+
+    this.ipcRenderer.on('getAnswersBySurveyIdResult', (event, res) => {
+      if (!this.mounted) return;
+
+      this.setLoading(false);
+      if (!res.data || !res.data.GetAnswersBySurveyIdResult){
+        console.log(res);
+        return alert(res.data);
+      }
+      if (res.data.GetAnswersBySurveyIdResult.match(/Error:/)){
+        console.log(res);
+        return alert(res.data.GetAnswersBySurveyIdResult);
+      }
+      let arr = res.data.GetAnswersBySurveyIdResult.split('<Answer>');
+      arr.shift();
+      console.log(arr);
+      if (arr.length < 1){
+        return alert('No answers/results returned for this query. Double check that your survey ID is correct.')
+      }
+      if (arr.length > 1000){
+        alert('The query returned ' + arr.length + ' responses, but this page will only display the first 1000. Please use the filterXML box to refine your search, or check the console for the full list of responses.')
+        arr =  arr.slice(0,1000);
+      }
+      for (var i = 0; i < arr.length; i++){
+        let item = {};
+        item.answerId = arr[i].match(/<AnswerId>/) ? arr[i].split('<AnswerId>')[1].split('</AnswerId>')[0] : 'None';
+        item.scaleId = arr[i].match(/<ScaleId>/) ? arr[i].split('<ScaleId>')[1].split('</ScaleId>')[0] : 'None';
+        item.questionId = arr[i].match(/<QuestionId>/) ? arr[i].split('<QuestionId>')[1].split('</QuestionId>')[0] : 'None';
+        item.answerText = arr[i].match(/<AnswerText>/) ? arr[i].split('<AnswerText>')[1].split('</AnswerText>')[0] : 'None';
+        item.answerDataType = arr[i].match(/<AnswerDataType>/) ? arr[i].split('<AnswerDataType>')[1].split('</AnswerDataType>')[0] : 'None';
+        item.answerWeight = arr[i].match(/<AnswerWeight>/) ? arr[i].split('<AnswerWeight>')[1].split('</AnswerWeight>')[0] : 'None';
+        arr[i] = item;
+      }
+      console.log(arr);
+      this.setState({
+        listOfAnswersBySurveyId: arr
+      })
+    })
+    
+    this.ipcRenderer.on('getResponsesBySurveyIdResult', (event, res) => {
+      if (!this.mounted) return;
+
+      this.setLoading(false);
+      console.log(res);
+      //alerts user of errors
+      if (typeof res.data === 'string'){
+        if (res.data.match(/Error/)){
+          return alert(res.data);
+        }
+      }else{
+        if (res.data.GetResponsesBySurveyIdResult.match(/Error/)){
+          if (res.data.GetResponsesBySurveyIdResult.match(/XML/)){
+            return alert(res.data.GetResponsesBySurveyIdResult + ' Check the filterXML for errors.');
+          }else{
+            return alert(res.data.GetResponsesBySurveyIdResult + ' Check the server/company that you are trying to access.');
+          }
+        }
+      }
+
+      let arr = res.data.GetResponsesBySurveyIdResult.split('<Response>');
+      arr.shift();
+
+      //Truncates results to max of 1000 displayed to avoid long wait times
+      if (arr.length > 1000){
+        alert('The API returned ' + arr.length + ' responses, but this page will only show the first 1000');
+        arr = arr.slice(0,1000);
+      }
+
+      //alerts user when no responses come back
+      if (arr.length < 1){
+        alert('No responses returned for this query');
+      }
+      
+      for (var i = 0; i < arr.length; i++){
+        let item = {};
+        item.responseId = arr[i].match(/<ResponseId>/) ? arr[i].split('<ResponseId>')[1].split('</ResponseId>')[0] : 'None';
+        item.surveyId = arr[i].match(/<SurveyId>/) ? arr[i].split('<SurveyId>')[1].split('</SurveyId>')[0] : 'None';
+        item.respondentId = arr[i].match(/<RespondentId>/) ? arr[i].split('<RespondentId>')[1].split('</RespondentId>')[0] : 'None';
+        item.questionId = arr[i].match(/<QuestionId>/) ? arr[i].split('<QuestionId>')[1].split('</QuestionId>')[0] : 'None';
+        item.scaleId = arr[i].match(/<ScaleId>/) ? arr[i].split('<ScaleId>')[1].split('</ScaleId>')[0] : 'None';
+        item.answerId = arr[i].match(/<AnswerId>/) ? arr[i].split('<AnswerId>')[1].split('</AnswerId>')[0] : 'None';
+        item.responseText = arr[i].match(/<ResponseText>/) ? arr[i].split('<ResponseText>')[1].split('</ResponseText>')[0] : 'None';
+        item.responseMemo = arr[i].match(/<ResponseMemo>/) ? arr[i].split('<ResponseMemo>')[1].split('</ResponseMemo>')[0] : 'None';
+        item.responseRank = arr[i].match(/<ResponseRank>/) ? arr[i].split('<ResponseRank>')[1].split('</ResponseRank>')[0] : 'None';
+        item.responseState = arr[i].match(/<ResponseState>/) ? arr[i].split('<ResponseState>')[1].split('</ResponseState>')[0] : 'None';
+        item.responseDate = arr[i].match(/<ResponseDate>/) ? arr[i].split('<ResponseDate>')[1].split('</ResponseDate>')[0] : 'None';
+        // item.languageId = arr[i].match(/<LanguageId>/) ? arr[i].split('<LanguageId>')[1].split('</LanguageId>')[0] : 'None';
+        item.responseNum = arr[i].match(/<ResponseNum>/) ? arr[i].split('<ResponseNum>')[1].split('</ResponseNum>')[0] : 'None';
+        item.completedDate = arr[i].match(/<CompletedDate>/) ? arr[i].split('<CompletedDate>')[1].split('</CompletedDate>')[0].substring(0, 10) : 'None';
+        arr[i] = item;
+      }
+      console.log(arr);
+      this.setState({
+        listOfResponsesBySurveyId: arr
+      })
+    })
+  }
+
+  componentWillUnmount(){
+    this.mounted = false;
   }
 
   changeForm(newForm){
@@ -137,27 +310,11 @@ class ResponseData extends Component {
     var baseURL = this.state.baseURL[this.props.server];
     this.setLoading(true);
 
-    ipcRenderer.send('/api/authenticate', {
+    this.ipcRenderer.send('/api/authenticate', {
       "url": `${baseURL}/EmailImport.HttpService.svc/web/authenticate`,
       "userName": this.props.username,
       "password": this.props.password,
       "companyName": this.props.company
-    })
-
-    ipcRenderer.on('authenticateUserResult', (event, res) => {
-      this.setLoading(false);
-      if (!res.data.AuthenticateResult){
-        console.log(res);
-        return alert('Error, no Auth token came back. Please check your spelling')
-      }
-      if (res.data.AuthenticateResult.match(/00000000/)){
-        console.log(res);
-        alert('Authentication failed. Double check your username, password, and that the company you are trying to access exists on the platform you have selected.')
-      }
-      console.log(res)
-      this.setState({
-        token: res.data.AuthenticateResult
-      })
     })
   }
 
@@ -167,19 +324,9 @@ class ResponseData extends Component {
     var baseURL = this.state.baseURL[this.props.server];
     this.setLoading(true);
 
-    ipcRenderer.send(`/api/getSurveyList`, {
+    this.ipcRenderer.send(`/api/getSurveyList`, {
       "url": `${baseURL}/EmailImport.HttpService.svc/web/getSurveyList`,
       "token": this.state.token
-    })
-    ipcRenderer.on('getSurveyListResult', (event, res) => {
-      this.setLoading(false);
-      console.log(res)
-      if (!res.data.GetSurveyListResult){
-        return alert(res.data);
-      }
-      this.setState({
-        surveyList: res.data.GetSurveyListResult
-      })
     })
   }
 
@@ -189,46 +336,11 @@ class ResponseData extends Component {
     var baseURL = this.state.baseURL[this.props.server];
     this.setLoading(true);
 
-    ipcRenderer.send(`/api/getQuestionsBySurveyId`, {
+    this.ipcRenderer.send(`/api/getQuestionsBySurveyId`, {
       "url": `${baseURL}/EmailImport.HttpService.svc/web/getQuestionsBySurveyId`,
       "token": this.state.token,
       "surveyId": this.state.surveyId,
       "filterXml": this.state.filterXml
-    })
-    ipcRenderer.on('getQuestionsBySurveyIdResult', (event, res) => {
-      this.setLoading(false);
-      if (!res.data.GetQuestionsBySurveyIdResult){
-        console.log(res);
-        return alert(res.data);
-      }
-      if (res.data.GetQuestionsBySurveyIdResult.match(/Error:/)){
-        console.log(res);
-        return alert(res.data.GetQuestionsBySurveyIdResult);
-      }
-      let arr = res.data.GetQuestionsBySurveyIdResult.split('<Question>');
-      arr.shift();
-      console.log(arr);
-      if (arr.length < 1){
-        return alert('No questions/results returned for this query. Double check that your survey ID is correct.');
-      }
-      if (arr.length > 1000){
-        alert('The query returned ' + arr.length + ' responses, but this page will only display the first 1000. Please use the filterXML box to refine your search, or check the console for the full list of responses.')
-        arr =  arr.slice(0,1000);
-      }
-      for (var i = 0; i < arr.length; i++){
-        let item = {};
-        item.questionId = arr[i].match(/<QuestionId>/) ? arr[i].split('<QuestionId>')[1].split('</QuestionId>')[0] : 'None';
-        item.questionText = arr[i].match(/<QuestionText>/) ? arr[i].split('<QuestionText>')[1].split('</QuestionText>')[0] : 'None';
-        item.questionShortCode = arr[i].match(/<QuestionShortCode>/) ? arr[i].split('<QuestionShortCode>')[1].split('</QuestionShortCode>')[0] : 'None';
-        item.questionAlias = arr[i].match(/<QuestionAlias>/) ? arr[i].split('<QuestionAlias>')[1].split('</QuestionAlias>')[0] : 'None';
-        item.questionType = arr[i].match(/<QuestionType>/) ? arr[i].split('<QuestionType>')[1].split('</QuestionType>')[0] : 'None';
-        item.questionStatus = arr[i].match(/<QuestionStatus>/) ? arr[i].split('<QuestionStatus>')[1].split('</QuestionStatus>')[0] : 'None';
-        item.extendedType = arr[i].match(/<ExtendedType>/) ? arr[i].split('<ExtendedType>')[1].split('</ExtendedType>')[0] : 'None';
-        arr[i] = item;
-      }
-      this.setState({
-        listOfQuestionsBySurveyId: arr
-      })
     })
   }
 
@@ -238,46 +350,11 @@ class ResponseData extends Component {
     var baseURL = this.state.baseURL[this.props.server];
     this.setLoading(true);
     
-    ipcRenderer.send(`/api/getAnswersBySurveyId`, {
+    this.ipcRenderer.send(`/api/getAnswersBySurveyId`, {
       "url": `${baseURL}/EmailImport.HttpService.svc/web/getAnswersBySurveyId`,
       "token": this.state.token,
       "surveyId": this.state.surveyId,
       "filterXml": this.state.filterXml
-    })
-    ipcRenderer.on('getAnswersBySurveyIdResult', (event, res) => {
-      this.setLoading(false);
-      if (!res.data.GetAnswersBySurveyIdResult){
-        console.log(res);
-        return alert(res.data);
-      }
-      if (res.data.GetAnswersBySurveyIdResult.match(/Error:/)){
-        console.log(res);
-        return alert(res.data.GetAnswersBySurveyIdResult);
-      }
-      let arr = res.data.GetAnswersBySurveyIdResult.split('<Answer>');
-      arr.shift();
-      console.log(arr);
-      if (arr.length < 1){
-        return alert('No answers/results returned for this query. Double check that your survey ID is correct.')
-      }
-      if (arr.length > 1000){
-        alert('The query returned ' + arr.length + ' responses, but this page will only display the first 1000. Please use the filterXML box to refine your search, or check the console for the full list of responses.')
-        arr =  arr.slice(0,1000);
-      }
-      for (var i = 0; i < arr.length; i++){
-        let item = {};
-        item.answerId = arr[i].match(/<AnswerId>/) ? arr[i].split('<AnswerId>')[1].split('</AnswerId>')[0] : 'None';
-        item.scaleId = arr[i].match(/<ScaleId>/) ? arr[i].split('<ScaleId>')[1].split('</ScaleId>')[0] : 'None';
-        item.questionId = arr[i].match(/<QuestionId>/) ? arr[i].split('<QuestionId>')[1].split('</QuestionId>')[0] : 'None';
-        item.answerText = arr[i].match(/<AnswerText>/) ? arr[i].split('<AnswerText>')[1].split('</AnswerText>')[0] : 'None';
-        item.answerDataType = arr[i].match(/<AnswerDataType>/) ? arr[i].split('<AnswerDataType>')[1].split('</AnswerDataType>')[0] : 'None';
-        item.answerWeight = arr[i].match(/<AnswerWeight>/) ? arr[i].split('<AnswerWeight>')[1].split('</AnswerWeight>')[0] : 'None';
-        arr[i] = item;
-      }
-      console.log(arr);
-      this.setState({
-        listOfAnswersBySurveyId: arr
-      })
     })
   }
 
@@ -292,66 +369,11 @@ class ResponseData extends Component {
     var baseURL = this.state.baseURL[this.props.server];
     this.setLoading(true);
     
-    ipcRenderer.send(`/api/getResponsesBySurveyId`, {
+    this.ipcRenderer.send(`/api/getResponsesBySurveyId`, {
       "url": `${baseURL}/EmailImport.HttpService.svc/web/getResponsesBySurveyId`,
       "token": this.state.token,
       "surveyId": this.state.surveyId,
       "filterXml": this.state.filterXml
-    })
-    ipcRenderer.on('getResponsesBySurveyIdResult', (event, res) => {
-      this.setLoading(false);
-      console.log(res);
-      //alerts user of errors
-      if (typeof res.data === 'string'){
-        if (res.data.match(/Error/)){
-          return alert(res.data);
-        }
-      }else{
-        if (res.data.GetResponsesBySurveyIdResult.match(/Error/)){
-          if (res.data.GetResponsesBySurveyIdResult.match(/XML/)){
-            return alert(res.data.GetResponsesBySurveyIdResult + ' Check the filterXML for errors.');
-          }else{
-            return alert(res.data.GetResponsesBySurveyIdResult + ' Check the server/company that you are trying to access.');
-          }
-        }
-      }
-
-      let arr = res.data.GetResponsesBySurveyIdResult.split('<Response>');
-      arr.shift();
-
-      //Truncates results to max of 1000 displayed to avoid long wait times
-      if (arr.length > 1000){
-        alert('The API returned ' + arr.length + ' responses, but this page will only show the first 1000');
-        arr = arr.slice(0,1000);
-      }
-
-      //alerts user when no responses come back
-      if (arr.length < 1){
-        alert('No responses returned for this query');
-      }
-      
-      for (var i = 0; i < arr.length; i++){
-        let item = {};
-        item.responseId = arr[i].match(/<ResponseId>/) ? arr[i].split('<ResponseId>')[1].split('</ResponseId>')[0] : 'None';
-        item.surveyId = arr[i].match(/<SurveyId>/) ? arr[i].split('<SurveyId>')[1].split('</SurveyId>')[0] : 'None';
-        item.respondentId = arr[i].match(/<RespondentId>/) ? arr[i].split('<RespondentId>')[1].split('</RespondentId>')[0] : 'None';
-        item.questionId = arr[i].match(/<QuestionId>/) ? arr[i].split('<QuestionId>')[1].split('</QuestionId>')[0] : 'None';
-        item.scaleId = arr[i].match(/<ScaleId>/) ? arr[i].split('<ScaleId>')[1].split('</ScaleId>')[0] : 'None';
-        item.answerId = arr[i].match(/<AnswerId>/) ? arr[i].split('<AnswerId>')[1].split('</AnswerId>')[0] : 'None';
-        item.responseText = arr[i].match(/<ResponseText>/) ? arr[i].split('<ResponseText>')[1].split('</ResponseText>')[0] : 'None';
-        item.responseMemo = arr[i].match(/<ResponseMemo>/) ? arr[i].split('<ResponseMemo>')[1].split('</ResponseMemo>')[0] : 'None';
-        item.responseRank = arr[i].match(/<ResponseRank>/) ? arr[i].split('<ResponseRank>')[1].split('</ResponseRank>')[0] : 'None';
-        item.responseState = arr[i].match(/<ResponseState>/) ? arr[i].split('<ResponseState>')[1].split('</ResponseState>')[0] : 'None';
-        item.responseDate = arr[i].match(/<ResponseDate>/) ? arr[i].split('<ResponseDate>')[1].split('</ResponseDate>')[0] : 'None';
-        // item.languageId = arr[i].match(/<LanguageId>/) ? arr[i].split('<LanguageId>')[1].split('</LanguageId>')[0] : 'None';
-        item.responseNum = arr[i].match(/<ResponseNum>/) ? arr[i].split('<ResponseNum>')[1].split('</ResponseNum>')[0] : 'None';
-        item.completedDate = arr[i].match(/<CompletedDate>/) ? arr[i].split('<CompletedDate>')[1].split('</CompletedDate>')[0].substring(0, 10) : 'None';
-        arr[i] = item;
-      }
-      console.log(arr);
-      this.setState({
-        listOfResponsesBySurveyId: arr
-      })
     })
   }
 
