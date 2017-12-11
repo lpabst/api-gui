@@ -96,9 +96,9 @@ class SendInvitationForNewRecipients extends Component {
       <div className='prepop_list'>
         <div>
           <p title='This is the question tag listed in the platform *Note: this is case sensitive.'>Question Tag</p>
-          <input className='prepop_input' value={this.state.tag1} onBlur={ (e)=> this.updatePrepopData(e, 'ScaleId', 0) } onChange={ (e) => this.updateLocalState(e.target.value, 'tag1' )} placeholder='question tag 1' />
-          <input className='prepop_input' value={this.state.tag2} onBlur={ (e)=> this.updatePrepopData(e, 'ScaleId', 1) } onChange={ (e) => this.updateLocalState(e.target.value, 'tag2' )} placeholder='question tag 2' />
-          <input className='prepop_input' value={this.state.tag3} onBlur={ (e)=> this.updatePrepopData(e, 'ScaleId', 2) } onChange={ (e) => this.updateLocalState(e.target.value, 'tag3' )} placeholder='question tag 3' />
+          <input className='prepop_input' value={this.state.tag1} onBlur={ (e)=> this.updatePrepopData(e, 'QuestionTag', 0) } onChange={ (e) => this.updateLocalState(e.target.value, 'tag1' )} placeholder='question tag 1' />
+          <input className='prepop_input' value={this.state.tag2} onBlur={ (e)=> this.updatePrepopData(e, 'QuestionTag', 1) } onChange={ (e) => this.updateLocalState(e.target.value, 'tag2' )} placeholder='question tag 2' />
+          <input className='prepop_input' value={this.state.tag3} onBlur={ (e)=> this.updatePrepopData(e, 'QuestionTag', 2) } onChange={ (e) => this.updateLocalState(e.target.value, 'tag3' )} placeholder='question tag 3' />
         </div>
         <div>
           <p title='Whatever you put here will be passed as pre-pop data'>Value</p>

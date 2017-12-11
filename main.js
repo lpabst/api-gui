@@ -20,7 +20,6 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1100, height: 900, show: false
   });
-  mainWindow.maximize();
 
   // and load the index.html of the app.
   let indexPath;
@@ -37,6 +36,7 @@ function createWindow() {
       pathname: path.join(__dirname, 'dist', 'index.html'),
       slashes: true
     });
+    mainWindow.maximize();
   }
   mainWindow.loadURL( indexPath );
 

@@ -149,66 +149,6 @@ class SurveyManagement extends Component {
       })
     })
 
-    //This one is special, because after getting the results, it actually triggers another call to the back end.
-    this.ipcRenderer.on('getQuestionsBySurveyIdResult', (event, res) => {
-      if (!this.mounted) return;
-
-      //Error Handling
-      if (!res.data.GetQuestionsBySurveyIdResult){
-        console.log(res);
-        this.setLoading(false);
-        return alert(res.data);
-      }
-      if (res.data.GetQuestionsBySurveyIdResult.match(/Error:/)){
-        console.log(res);
-        this.setLoading(false);
-        return alert(res.data.GetQuestionsBySurveyIdResult);
-      }
-
-      //update prepop array to have Scale IDs instead of question tags
-      let arr = res.data.GetQuestionsBySurveyIdResult.split('<Question>');
-      arr.shift();
-      let prepop = this.state.prepopData.slice();
-      for (let i = 0; i < prepop.length; i++){
-        for (let k = 0; k < arr.length; k++){
-          let questionId = arr[k].match(/<QuestionId>/) ? arr[k].split('<QuestionId>')[1].split('</QuestionId>')[0] : 'None';
-          let questionShortCode = arr[k].match(/<QuestionShortCode>/) ? arr[k].split('<QuestionShortCode>')[1].split('</QuestionShortCode>')[0] : 'None';
-          if (questionShortCode == prepop[i].ScaleId){
-            prepop[i].ScaleId = questionId;
-          }
-        }
-      }
-
-      //Error handling checks if any question tag's weren't able to convert to Scale ID
-      for (let i = 0; i < prepop.length; i++){
-        if (prepop[i].ScaleId && Number(prepop[i].ScaleId) != prepop[i].ScaleId){
-          this.setLoading(false);
-          return alert('Unable to find a question in the survey with the question tag listed in prepop #' + (i+1) + ' (failed to send). **Note: The question tag listed here is case sensitive, double check your spelling and capitalizations.');
-        }else if (!prepop[i].ScaleId){
-          prepop.splice(i--, 1);
-        }
-      }
-
-      //Add prepop data to email invites
-      let recipients = this.state.recipients.slice();
-      for (var i = 0; i < recipients.length; i++){
-        recipients[i].PrepopData = prepop;
-      }
-      // console.log(prepop);
-      
-      //now that we have the scale Id's, send the invites out
-      console.log('Sending Invites to new recipients')
-      console.log(recipients);
-      this.ipcRenderer.send(`/api/sendInvitationForNewRecipients`, {
-        "url": `${this.baseURL}/HttpService.svc/web/sendInvitationForNewRecipients`,
-        "token": this.state.token,
-        "surveyId": this.state.surveyId,
-        "recipients": recipients,
-        "sampleDeDuplicationRule": this.state.deDupeLegend[this.state.deDupeRule],
-        "sampleErrorHandlingRule": this.state.errorHandlingLegend[this.state.errorHandlingRule]
-      })
-    })
-
     this.ipcRenderer.on('sendInvitationForNewRecipientsResult', (event, res) => {
       if (!this.mounted) return;
 
@@ -343,22 +283,37 @@ class SurveyManagement extends Component {
       return alert('No email addresses were entered. Please enter an email address.');
     }
     for (let i = 0; i < this.state.prepopData.length; i++){
-      if (this.state.prepopData[i].ScaleId && !this.state.prepopData[i].Value){
+      if (this.state.prepopData[i].QuestionTag && !this.state.prepopData[i].Value){
         return alert('Prepop #' + (i+1) + ' has a question tag listed, but no value. Please include a value or delete this question tag.');
       }
-      if (!this.state.prepopData[i].ScaleId && this.state.prepopData[i].Value){
+      if (!this.state.prepopData[i].QuestionTag && this.state.prepopData[i].Value){
         return alert('Prepop #' + (i+1) + ' has a value listed, but no question tag. Please include a question tag or delete this value.');
       }
     }
-    
-    //Set loading screen and send axios call to get question scale ids
-    console.log('Getting Question Scale IDs...')
-    this.setLoading(true);
-    this.ipcRenderer.send('/api/getQuestionsBySurveyId', {
-      "url": `${baseURL}/EmailImport.HttpService.svc/web/getQuestionsBySurveyId`,
+
+    let prepop = this.state.prepopData.slice();
+
+    //Remove prepops that aren't being used
+    for (let i = 0; i < prepop.length; i++){
+      if (!prepop[i].QuestionTag){
+        prepop.splice(i--, 1);
+      }
+    }
+
+    // Add prepop data to each email in the list
+    let recipients = this.state.recipients.slice();
+    for (var i = 0; i < recipients.length; i++){
+      recipients[i].PrepopData = prepop;
+    }
+
+    console.log('Sending email invitations...');
+    this.ipcRenderer.send(`/api/sendInvitationForNewRecipients`, {
+      "url": `${this.baseURL}/HttpService.svc/web/sendInvitationForNewRecipients`,
       "token": this.state.token,
       "surveyId": this.state.surveyId,
-      "filterXml": this.state.filterXml
+      "recipients": recipients,
+      "sampleDeDuplicationRule": this.state.deDupeLegend[this.state.deDupeRule],
+      "sampleErrorHandlingRule": this.state.errorHandlingLegend[this.state.errorHandlingRule]
     })
   }
 
