@@ -10,7 +10,7 @@ import GetEmailListsBySurveyId from './Forms/GetEmailListsBySurveyId.js';
 import GetOptOuts from './Forms/GetOptOuts.js';
 
 //Images for results
-import emailListImg from './../../media/questionsHelp.png';
+import emailListImg from './../../media/email_list_img.png';
 
 //Results Components
 import AuthenticateResults from './Results/AuthenticateResults.js';
