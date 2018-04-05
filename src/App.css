@@ -161,6 +161,7 @@ h2{
   bottom: 10px;
   right: 10px;
   user-select: none;
+  z-index: 9999;
 }
 
 .consoleToggle:active{
@@ -207,4 +208,15 @@ h2{
   outline: none;
   margin: 20px 20px 0px 20px;
   resize: none;
+}
+
+.clearConsoleBtn{
+  width: 140px;
+  height: 30px;
+  border-radius: 3px;
+  background: #f12;
+  color: #500;
+  text-shadow: 0.5px 0.5px 0.5px black;
+  margin-left: 330px;
+  cursor: pointer;
 }

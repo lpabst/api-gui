@@ -4,12 +4,12 @@ import React, { Component } from 'react';
 class GetEmailListBySurveyIdResults extends Component {
   
   componentDidMount(){
-    console.log('emillist result')
-    console.log(this.props.emailList)
+    log('emillist result')
+    log(this.props.emailList)
   }
 
   render() {
-    console.log(this.props.emailList)
+    log(this.props.emailList)
     return (
       <table style={{margin: '0 auto'}}>
         <tbody>

@@ -10,11 +10,16 @@ class App extends Component {
     super(props);
     this.state={
       consoleOpen: false,
+      showClearConsole: false,
     }
+
+    this.toggleClearConsole = this.toggleClearConsole.bind(this);
+    this.resetConsoleContent = this.resetConsoleContent.bind(this);
   }
 
   componentDidMount(){
     document.getElementById('response-data').click();
+    window.consoleContent = 'Console Messages Will Appear Here';
   }
 
   scrollUp(){
@@ -25,7 +30,20 @@ class App extends Component {
     })
   }
 
+  toggleClearConsole(){
+    this.setState({
+      showClearConsole: !this.state.showClearConsole
+    })
+  }
+
+  resetConsoleContent(){
+    window.consoleContent = 'Console Messages Will Appear Here';
+    window.consoleUpdated = false;
+    this.toggleClearConsole();
+  }
+
   render() {
+
     return (
       <div className="App">
 
@@ -48,7 +66,15 @@ class App extends Component {
           <div className='console'>
             <div className='consoleCloseX' onClick={() => this.setState({consoleOpen: false})} > X </div>
             <p className='consoleHeader' >Console Messages</p>
-            <textarea id='consoleContent' value='Console Messages Will Appear Here'></textarea>
+            <textarea id='consoleContent' value={window.consoleContent} readOnly={true}></textarea>
+            <button className='clearConsoleBtn' onClick={this.toggleClearConsole} title='Clear the console when it gets too much content and slows down' >Clear App Console</button>
+            { this.state.showClearConsole && 
+              <span>
+                Are You Sure?
+                <button onClick={this.resetConsoleContent}>Yes</button>
+                <button onClick={this.toggleClearConsole}>No</button>
+              </span>
+            }
           </div>
         }
 

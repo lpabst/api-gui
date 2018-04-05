@@ -30,6 +30,25 @@ import {updateReduxState} from './../../ducks/reducer.js';
 import {ipcRenderer, remote} from 'electron';
 import { prependOnceListener } from 'cluster';
 
+// console.logs the messages, makes sure it's a string, then adds it to the app's console as well
+function log(message){
+  console.log(message);
+  if (typeof message !== 'string'){
+    message = JSON.stringify(message);
+  }
+
+  if (!window.consoleUpdated){
+    window.consoleContent = message;
+    window.consoleUpdated = true;
+  }else{
+    window.consoleContent += '\n' + message;
+  }
+
+  if (document.getElementById('consoleContent')){
+    document.getElementById('consoleContent').value = window.consoleContent;
+  }
+}
+
 class SurveyManagement extends Component {
 
   constructor(props){
@@ -88,14 +107,14 @@ class SurveyManagement extends Component {
 
       this.setLoading(false);
       if (!res.data.AuthenticateResult){
-        console.log(res);
+        log(res);
         return alert('Error, no Auth token came back. Please check your spelling')
       }
       if (res.data.AuthenticateResult.match(/00000000/)){
-        console.log(res);
+        log(res);
         alert('Authentication failed. Double check your username, password, and that the company you are trying to access exists on the platform you have selected.')
       }
-      console.log(res)
+      log(res)
       this.setState({
         token: res.data.AuthenticateResult
       })
@@ -105,7 +124,7 @@ class SurveyManagement extends Component {
       if (!this.mounted) return;
 
       this.setLoading(false);
-      console.log(res)
+      log(res)
       if (!res.data.GetSurveyListResult){
         return alert(res.data);
       }
@@ -118,7 +137,7 @@ class SurveyManagement extends Component {
       if (!this.mounted) return;
 
       this.setLoading(false);
-      console.log(res)
+      log(res)
       //Error handling
       if (!res.data.GetOptOutsResult){
         if (res.data.GetOptOutsResult === ''){
@@ -143,7 +162,7 @@ class SurveyManagement extends Component {
         item.Description = arr[i].match(/<Description>/) ? arr[i].split('<Description>')[1].split('</Description>')[0] : 'None';
         arr[i] = item;
       }
-      console.log(arr);
+      log(arr);
       this.setState({
         optOutList: arr
       })
@@ -152,7 +171,7 @@ class SurveyManagement extends Component {
     this.ipcRenderer.on('sendInvitationForNewRecipientsResult', (event, res) => {
       if (!this.mounted) return;
 
-      console.log(res);
+      log(res);
       this.setLoading(false);
       //Error handling
       if (res.data.message){
@@ -170,10 +189,10 @@ class SurveyManagement extends Component {
     this.ipcRenderer.on('getEmailListsBySurveyIdResult', (event, res) => {
       if (!this.mounted) return;
 
-      console.log(res);
+      log(res);
       this.setLoading(false);
       if (res.data.GetEmailListsBySurveyIdResult.match('Error:')){
-        console.log(res);
+        log(res);
         return alert('Error retrieving the email list. Check the console for more information');
       }
       let arr = res.data.GetEmailListsBySurveyIdResult.split('<EmailListId>');
@@ -191,7 +210,7 @@ class SurveyManagement extends Component {
         item.IsRolling = arr[i].match(/<IsRolling>/) ? arr[i].split('<IsRolling>')[1].split('</IsRolling>')[0] : 'None';
         arr[i] = item;
       }
-      console.log(arr);
+      log(arr);
       this.setState({
         emailList: arr
       })
@@ -210,10 +229,10 @@ class SurveyManagement extends Component {
 
   updateState(e, key){
     var newState = Object.assign({}, this.state);
-    // console.log(newState);
-    // console.log(e.target.value);
+    // log(newState);
+    // log(e.target.value);
     newState[key] = e.target.value;
-    // console.log(newState);
+    // log(newState);
     this.setState(newState);
   }
 
@@ -225,9 +244,9 @@ class SurveyManagement extends Component {
 
   authenticateUser(e){
     e.preventDefault();
-    console.log('authenticating user');
+    log('authenticating user');
     var baseURL = this.state.baseURL[this.props.server];
-    console.log(this.props);
+    log(this.props);
     this.setLoading(true);
 
     this.ipcRenderer.send(`/api/authenticate`, {
@@ -240,7 +259,7 @@ class SurveyManagement extends Component {
   
   getSurveyList(e){
     e.preventDefault();
-    console.log('GetSurveyList sent')
+    log('GetSurveyList sent')
     var baseURL = this.state.baseURL[this.props.server];
     this.setLoading(true);
 
@@ -252,7 +271,7 @@ class SurveyManagement extends Component {
 
   getOptOuts(e){
     e.preventDefault();
-    console.log('getOptOuts sent')
+    log('getOptOuts sent')
     var baseURL = this.state.baseURL[this.props.server];
 
     //This ensures that if the user checks opt outs for the site/domain, no surveyId is passed
@@ -306,7 +325,7 @@ class SurveyManagement extends Component {
       recipients[i].PrepopData = prepop;
     }
 
-    console.log('Sending email invitations...');
+    log('Sending email invitations...');
     this.ipcRenderer.send(`/api/sendInvitationForNewRecipients`, {
       "url": `${this.baseURL}/HttpService.svc/web/sendInvitationForNewRecipients`,
       "token": this.state.token,
@@ -319,7 +338,7 @@ class SurveyManagement extends Component {
 
   getEmailListsBySurveyId(e){
     e.preventDefault();
-    console.log('Getting email list for survey# ' + this.state.surveyId);
+    log('Getting email list for survey# ' + this.state.surveyId);
     var baseURL = this.state.baseURL[this.props.server];
     this.setLoading(true);
 
@@ -365,7 +384,7 @@ class SurveyManagement extends Component {
               <a rel='noopener noreferrer' href='https://developer.maritzcx.com/api/#cat-2' target='_blank' id='header_docs_link'>See The Docs</a>
               <h2>Survey Management API</h2>
 
-              <ComponentName token={this.state.token} surveyId={this.state.surveyId} sOptOutType={this.state.sOptOutType} filterXml={this.state.filterXml} surveyList={this.state.surveyList} deDupeRule={this.state.deDupeRule} errorHandlingRule={this.state.errorHandlingRule} recipients={this.state.recipients} prepopData={this.state.prepopData} updateState={this.updateState} authenticateUser = {this.authenticateUser} getSurveyList={this.getSurveyList} getOptOuts={this.getOptOuts} sendInvitationForNewRecipients={this.sendInvitationForNewRecipients} getEmailListsBySurveyId={this.getEmailListsBySurveyId} />
+              <ComponentName token={this.state.token} surveyId={this.state.surveyId} sOptOutType={this.state.sOptOutType} filterXml={this.state.filterXml} surveyList={this.state.surveyList} deDupeRule={this.state.deDupeRule} errorHandlingRule={this.state.errorHandlingRule} recipients={this.state.recipients} prepopData={this.state.prepopData} updateState={this.updateState} authenticateUser = {this.authenticateUser} getSurveyList={this.getSurveyList} getOptOuts={this.getOptOuts} sendInvitationForNewRecipients={this.sendInvitationForNewRecipients} getEmailListsBySurveyId={this.getEmailListsBySurveyId} log={log} />
 
           </div>
 
@@ -377,7 +396,7 @@ class SurveyManagement extends Component {
 
               <ul className='results'>
                   
-                <ResultsToShow token={this.state.token} surveyList={this.state.surveyList} optOutList={this.state.optOutList} emailList={this.state.emailList} invitationScheduleList={this.state.invitationScheduleList} reminderScheduleList={this.state.reminderScheduleList} />
+                <ResultsToShow token={this.state.token} surveyList={this.state.surveyList} optOutList={this.state.optOutList} emailList={this.state.emailList} invitationScheduleList={this.state.invitationScheduleList} reminderScheduleList={this.state.reminderScheduleList} log={log} />
                   
               </ul>
 

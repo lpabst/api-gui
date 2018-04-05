@@ -15,6 +15,25 @@ import {updateReduxState} from './../../ducks/reducer.js';
 // import server from the backend for "API" calls
 import {ipcRenderer, remote} from 'electron';
 
+// console.logs the messages, makes sure it's a string, then adds it to the app's console as well
+function log(message){
+  console.log(message);
+  if (typeof message !== 'string'){
+    message = JSON.stringify(message);
+  }
+
+  if (!window.consoleUpdated){
+    window.consoleContent = message;
+    window.consoleUpdated = true;
+  }else{
+    window.consoleContent += '\n' + message;
+  }
+
+  if (document.getElementById('consoleContent')){
+    document.getElementById('consoleContent').value = window.consoleContent;
+  }
+}
+
 class ResponseData extends Component {
 
   constructor(props){
@@ -68,14 +87,14 @@ class ResponseData extends Component {
 
       this.setLoading(false);
       if (!res.data || !res.data.AuthenticateResult){
-        console.log(res);
+        log(res);
         return alert('Error, no Auth token came back. Please check your spelling')
       }
       if (res.data.AuthenticateResult.match(/00000000/)){
-        console.log(res);
+        log(res);
         alert('Authentication failed. Double check your username, password, and that the company you are trying to access exists on the platform you have selected.')
       }
-      console.log(res)
+      log(res)
       this.setState({
         token: res.data.AuthenticateResult
       })
@@ -99,16 +118,16 @@ class ResponseData extends Component {
 
       this.setLoading(false);
       if (!res.data || !res.data.GetQuestionsBySurveyIdResult){
-        console.log(res);
+        log(res);
         return alert(res.data);
       }
       if (res.data.GetQuestionsBySurveyIdResult.match(/Error:/)){
-        console.log(res);
+        log(res);
         return alert(res.data.GetQuestionsBySurveyIdResult);
       }
       let arr = res.data.GetQuestionsBySurveyIdResult.split('<Question>');
       arr.shift();
-      console.log(arr);
+      log(arr);
       if (arr.length < 1){
         return alert('No questions/results returned for this query. Double check that your survey ID is correct.');
       }
@@ -137,16 +156,16 @@ class ResponseData extends Component {
 
       this.setLoading(false);
       if (!res.data || !res.data.GetAnswersBySurveyIdResult){
-        console.log(res);
+        log(res);
         return alert(res.data);
       }
       if (res.data.GetAnswersBySurveyIdResult.match(/Error:/)){
-        console.log(res);
+        log(res);
         return alert(res.data.GetAnswersBySurveyIdResult);
       }
       let arr = res.data.GetAnswersBySurveyIdResult.split('<Answer>');
       arr.shift();
-      console.log(arr);
+      log(arr);
       if (arr.length < 1){
         return alert('No answers/results returned for this query. Double check that your survey ID is correct.')
       }
@@ -164,7 +183,7 @@ class ResponseData extends Component {
         item.answerWeight = arr[i].match(/<AnswerWeight>/) ? arr[i].split('<AnswerWeight>')[1].split('</AnswerWeight>')[0] : 'None';
         arr[i] = item;
       }
-      console.log(arr);
+      log(arr);
       this.setState({
         listOfAnswersBySurveyId: arr
       })
@@ -174,7 +193,7 @@ class ResponseData extends Component {
       if (!this.mounted) return;
 
       this.setLoading(false);
-      console.log(res);
+      log(res);
       //alerts user of errors
       if (typeof res.data === 'string'){
         if (res.data.match(/Error/)){
@@ -222,7 +241,7 @@ class ResponseData extends Component {
         item.completedDate = arr[i].match(/<CompletedDate>/) ? arr[i].split('<CompletedDate>')[1].split('</CompletedDate>')[0].substring(0, 10) : 'None';
         arr[i] = item;
       }
-      console.log(arr);
+      log(arr);
       this.setState({
         listOfResponsesBySurveyId: arr
       })
@@ -258,7 +277,7 @@ class ResponseData extends Component {
   }
 
   updateXML(callback){
-    console.log('updating XML');
+    log('updating XML');
     var {xmlBeginDate, xmlEndDate, xmlDateFilter, xmlIdFilter, xmlIdFilterId, xmlBoxToShow} = this.state;
 
     //make sure we have a beginning and end date instead of just one
@@ -293,7 +312,7 @@ class ResponseData extends Component {
     }else{
       filterXml = '';
     }
-    console.log(filterXml);
+    log(filterXml);
     this.setState({
       filterXml: filterXml,
       xmlBoxToShow: 'raw'
@@ -321,7 +340,7 @@ class ResponseData extends Component {
 
   getSurveyList(e){
     e.preventDefault();
-    console.log('GetSurveyList sent');
+    log('GetSurveyList sent');
     var baseURL = this.state.baseURL[this.props.server];
     this.setLoading(true);
 
@@ -333,7 +352,7 @@ class ResponseData extends Component {
 
   getQuestionsBySurveyId(e){
     e.preventDefault();
-    console.log('getQuestionsBySurveyId sent');
+    log('getQuestionsBySurveyId sent');
     var baseURL = this.state.baseURL[this.props.server];
     this.setLoading(true);
 
@@ -347,7 +366,7 @@ class ResponseData extends Component {
 
   getAnswersBySurveyId(e){
     e.preventDefault();
-    console.log('getAnswersBySurveyId sent');
+    log('getAnswersBySurveyId sent');
     var baseURL = this.state.baseURL[this.props.server];
     this.setLoading(true);
     
@@ -366,7 +385,7 @@ class ResponseData extends Component {
     if (this.state.xmlBoxToShow == 'easy'){
       return this.updateXML(this.getResponsesBySurveyId);
     }
-    console.log('getResponsesBySurveyId sent');
+    log('getResponsesBySurveyId sent');
     var baseURL = this.state.baseURL[this.props.server];
     this.setLoading(true);
     
@@ -447,7 +466,7 @@ class ResponseData extends Component {
                         <tbody>
                           {
                             this.state.listOfQuestionsBySurveyId.map( (item, i) => {
-                              console.log(item);
+                              log(item);
                               return  <tr key={i}>
                                         <td style={{width: '30px'}}>{i+1}</td>
                                         <td style={{width: '130px'}}> <p>QuestionId: {item.questionId}</p> </td>

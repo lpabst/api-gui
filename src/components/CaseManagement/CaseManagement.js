@@ -12,6 +12,25 @@ import {updateReduxState} from './../../ducks/reducer.js';
 // import server from the backend for "API" calls
 import {ipcRenderer, remote} from 'electron';
 
+// console.logs the messages, makes sure it's a string, then adds it to the app's console as well
+function log(message){
+  console.log(message);
+  if (typeof message !== 'string'){
+    message = JSON.stringify(message);
+  }
+
+  if (!window.consoleUpdated){
+    window.consoleContent = message;
+    window.consoleUpdated = true;
+  }else{
+    window.consoleContent += '\n' + message;
+  }
+
+  if (document.getElementById('consoleContent')){
+    document.getElementById('consoleContent').value = window.consoleContent;
+  }
+}
+
 class CaseManagement extends Component {
 
   constructor(props){
@@ -72,10 +91,10 @@ class CaseManagement extends Component {
 
       this.setLoading(false);
       if (!res.data || !res.data.AuthenticateResult){
-        console.log(res);
+        log(res);
         return alert('Error, no Auth token came back. Please check your spelling')
       }
-      console.log(res);
+      log(res);
       this.setState({
         authResult: res.data.AuthenticateResult,
         token: res.data.AuthenticateResult.token
@@ -86,21 +105,21 @@ class CaseManagement extends Component {
       if (!this.mounted) return;
       
       this.setLoading(false);
-      console.log(res);
+      log(res);
     })
 
     this.ipcRenderer.on('getMessagesResult', (event, res) => {
       if (!this.mounted) return;
       
       this.setLoading(false);
-      console.log(res);
+      log(res);
     })
     
     this.ipcRenderer.on('getUserListResult', (event, res) => {
       if (!this.mounted) return;
       
       this.setLoading(false);
-      console.log(res);
+      log(res);
       if (!res.data || !res.data.GetUserListResult || res.data.GetUserListResult.statusMessage.match(/Error/)){
         return alert('Error occurred. Please check you are logged in and passing the correct auth token!')
       }else if (res.data.GetUserListResult.totalSearchCount == '0'){
