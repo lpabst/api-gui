@@ -103,7 +103,10 @@ class SurveyManagement extends Component {
 
     //This sets all of the event listeners for the results that come from the back end
     this.ipcRenderer.on('authenticateUserResult', (event, res) => {
-      if (!this.mounted) return;
+      if (!this.mounted) {
+        log(' Survey Mgt Component Not Mounted, stopping authenticateUserResult result function'); 
+        return;
+      }
 
       this.setLoading(false);
       if (!res.data.AuthenticateResult){
@@ -121,7 +124,10 @@ class SurveyManagement extends Component {
     })
 
     this.ipcRenderer.on('getSurveyListResult', (event, res) => {
-      if (!this.mounted) return;
+      if (!this.mounted) {
+        log(' Survey Mgt Component Not Mounted, stopping getSurveyListResult result function'); 
+        return;
+      }
 
       this.setLoading(false);
       log(res)
@@ -134,7 +140,10 @@ class SurveyManagement extends Component {
     })
 
     this.ipcRenderer.on('getOptOutsResult', (event, res) => {
-      if (!this.mounted) return;
+      if (!this.mounted) {
+        log(' Survey Mgt Component Not Mounted, stopping getOptOutsResult result function'); 
+        return;
+      }
 
       this.setLoading(false);
       log(res)
@@ -169,7 +178,10 @@ class SurveyManagement extends Component {
     })
 
     this.ipcRenderer.on('sendInvitationForNewRecipientsResult', (event, res) => {
-      if (!this.mounted) return;
+      if (!this.mounted) {
+        log(' Survey Mgt Component Not Mounted, stopping sendInvitationForNewRecipientsResult result function'); 
+        return;
+      }
 
       log(res);
       this.setLoading(false);
@@ -187,7 +199,10 @@ class SurveyManagement extends Component {
     })
     
     this.ipcRenderer.on('getEmailListsBySurveyIdResult', (event, res) => {
-      if (!this.mounted) return;
+      if (!this.mounted) {
+        log(' Survey Mgt Component Not Mounted, stopping getEmailListsBySurveyIdResult result function'); 
+        return;
+      }
 
       log(res);
       this.setLoading(false);

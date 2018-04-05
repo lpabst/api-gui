@@ -83,7 +83,10 @@ class ResponseData extends Component {
     
     //This sets the event listeners from responses from the back end
     this.ipcRenderer.on('authenticateUserResult', (event, res) => {
-      if (!this.mounted) return;
+      if (!this.mounted) {
+        log(' Response Data Component Not Mounted, stopping authenticateUserResult result function'); 
+        return;
+      }
 
       this.setLoading(false);
       if (!res.data || !res.data.AuthenticateResult){
@@ -101,7 +104,10 @@ class ResponseData extends Component {
     })
 
     this.ipcRenderer.on('getSurveyListResult', (event, res) => {
-      if (!this.mounted) return;
+      if (!this.mounted) {
+        log(' Response Data Component Not Mounted, stopping getSurveyListResult result function'); 
+        return;
+      }
 
       this.setLoading(false);
       
@@ -114,7 +120,10 @@ class ResponseData extends Component {
     })
     
     this.ipcRenderer.on('getQuestionsBySurveyIdResult', (event, res) => {
-      if (!this.mounted) return;
+      if (!this.mounted) {
+        log(' Response Data Component Not Mounted, stopping getQuestionsBySurveyIdResult result function'); 
+        return;
+      }
 
       this.setLoading(false);
       if (!res.data || !res.data.GetQuestionsBySurveyIdResult){
@@ -152,7 +161,10 @@ class ResponseData extends Component {
     })
 
     this.ipcRenderer.on('getAnswersBySurveyIdResult', (event, res) => {
-      if (!this.mounted) return;
+      if (!this.mounted) {
+        log(' Response Data Component Not Mounted, stopping getAnswersBySurveyIdResult result function'); 
+        return;
+      }
 
       this.setLoading(false);
       if (!res.data || !res.data.GetAnswersBySurveyIdResult){
@@ -190,7 +202,10 @@ class ResponseData extends Component {
     })
     
     this.ipcRenderer.on('getResponsesBySurveyIdResult', (event, res) => {
-      if (!this.mounted) return;
+      if (!this.mounted) {
+        log(' Response Data Component Not Mounted, stopping getResponsesBySurveyIdResult result function'); 
+        return;
+      }
 
       this.setLoading(false);
       log(res);
@@ -327,6 +342,7 @@ class ResponseData extends Component {
 
   authenticateUser(e){
     e.preventDefault();
+    log('Authenticating User for response data');
     var baseURL = this.state.baseURL[this.props.server];
     this.setLoading(true);
 
@@ -340,7 +356,7 @@ class ResponseData extends Component {
 
   getSurveyList(e){
     e.preventDefault();
-    log('GetSurveyList sent');
+    log('GetSurveyList sent for response data');
     var baseURL = this.state.baseURL[this.props.server];
     this.setLoading(true);
 
