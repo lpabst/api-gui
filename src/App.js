@@ -6,6 +6,12 @@ import './App.css';
 
 
 class App extends Component {
+  constructor(props){
+    super(props);
+    this.state={
+      consoleOpen: false,
+    }
+  }
 
   componentDidMount(){
     document.getElementById('response-data').click();
@@ -34,6 +40,18 @@ class App extends Component {
 
         { router }
 
+        <div className='consoleToggle' onClick={() => this.setState({consoleOpen: !this.state.consoleOpen})} > 
+          Console
+        </div>
+
+        { this.state.consoleOpen && 
+          <div className='console'>
+            <div className='consoleCloseX' onClick={() => this.setState({consoleOpen: false})} > X </div>
+            <p className='consoleHeader' >Console Messages</p>
+            <textarea id='consoleContent' value='Console Messages Will Appear Here'></textarea>
+          </div>
+        }
+
       </div>
     );
   }
@@ -41,22 +59,3 @@ class App extends Component {
 
 
 export default App;
-
-
-
-// import './App.css';
-// import React, { Component } from 'react';
-
-// class App extends React.Component {
-//   render() {
-//     return (
-//       <div>
-//         <h1>Hello, Electron!</h1>
-//         <p>I hope you enjoy using basic-electron-react-boilerplate to start your dev off right!</p>
-//         <p>Hello World again with routes!</p>
-//       </div>
-//     );
-//   }
-// }
-
-// export default App;

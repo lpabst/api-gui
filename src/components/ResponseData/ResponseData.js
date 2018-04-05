@@ -112,9 +112,9 @@ class ResponseData extends Component {
       if (arr.length < 1){
         return alert('No questions/results returned for this query. Double check that your survey ID is correct.');
       }
-      if (arr.length > 1000){
-        alert('The query returned ' + arr.length + ' responses, but this page will only display the first 1000. Please use the filterXML box to refine your search, or check the console for the full list of responses.')
-        arr =  arr.slice(0,1000);
+      if (arr.length > 10000){
+        alert('The query returned ' + arr.length + ' responses, but this page will only display the first 10000. Please use the filterXML box to refine your search, or check the console for the full list of responses.')
+        arr =  arr.slice(0,10000);
       }
       for (var i = 0; i < arr.length; i++){
         let item = {};
@@ -150,9 +150,9 @@ class ResponseData extends Component {
       if (arr.length < 1){
         return alert('No answers/results returned for this query. Double check that your survey ID is correct.')
       }
-      if (arr.length > 1000){
-        alert('The query returned ' + arr.length + ' responses, but this page will only display the first 1000. Please use the filterXML box to refine your search, or check the console for the full list of responses.')
-        arr =  arr.slice(0,1000);
+      if (arr.length > 10000){
+        alert('The query returned ' + arr.length + ' responses, but this page will only display the first 10000. Please use the filterXML box to refine your search, or check the console for the full list of responses.')
+        arr =  arr.slice(0,10000);
       }
       for (var i = 0; i < arr.length; i++){
         let item = {};
@@ -193,10 +193,10 @@ class ResponseData extends Component {
       let arr = res.data.GetResponsesBySurveyIdResult.split('<Response>');
       arr.shift();
 
-      //Truncates results to max of 1000 displayed to avoid long wait times
-      if (arr.length > 1000){
-        alert('The API returned ' + arr.length + ' responses, but this page will only show the first 1000');
-        arr = arr.slice(0,1000);
+      //Truncates results to max of 10000 displayed to avoid long wait times while the GUI parses the data into a table
+      if (arr.length > 10000){
+        alert('The API returned ' + arr.length + ' responses, but this page will only show the first 10000');
+        arr = arr.slice(0,10000);
       }
 
       //alerts user when no responses come back

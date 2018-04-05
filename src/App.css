@@ -148,3 +148,63 @@ h2{
     right: 8%;
   }
 }
+
+.consoleToggle{
+  width: 120px;
+  height: 20px;
+  text-align: center;
+  line-height: 19px;
+  cursor: pointer;
+  background: #eee;
+  border-radius: 3px;
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  user-select: none;
+}
+
+.consoleToggle:active{
+  box-shadow: inset 1px 1px 1px black;
+}
+
+.console{
+  width: 800px;
+  height: 500px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  position: fixed;
+  top: calc(50% - 250px);
+  left: calc(50% - 400px);
+  border: 2px solid black;
+  box-shadow: 2px 2px 3px black;
+  background: white;
+  padding: 40px 0px 40px 0px;
+}
+
+.consoleCloseX{
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  font-weight: bold;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+}
+
+.consoleHeader{
+  width: 100%;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+#consoleContent{
+  width: 740px;
+  min-height: 350px;
+  border: 1px solid gray;
+  outline: none;
+  margin: 20px 20px 0px 20px;
+  resize: none;
+}
