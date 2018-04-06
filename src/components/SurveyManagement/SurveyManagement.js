@@ -88,20 +88,22 @@ class SurveyManagement extends Component {
     //This sets all of the event listeners for the results that come from the back end
     this.ipcRenderer.on('authenticateUserResult', (event, res) => {
       if (!this.mounted) {
-        log('Survey Mgt Component Not Mounted, stopping authenticateUserResult result function'); 
-        return;
+        return log('Survey Mgt Component Not Mounted, stopping authenticateUserResult result function'); 
       }
 
       this.setLoading(false);
+      log(res);
+
+      if (!res.data){
+        return alert('Unexpected error. Please check the console for more details.');
+      }
       if (!res.data.AuthenticateResult){
-        log(res);
-        return alert('Error, no Auth token came back. Please check your spelling')
+        return alert('Error, no Auth token came back. Please check your spelling');
       }
       if (res.data.AuthenticateResult.match(/00000000/)){
-        log(res);
-        alert('Authentication failed. Double check your username, password, and that the company you are trying to access exists on the platform you have selected.')
+        alert('Authentication failed. Double check your username, password, and that the company you are trying to access exists on the platform you have selected.');
       }
-      log(res)
+      
       this.setState({
         token: res.data.AuthenticateResult
       })
@@ -109,15 +111,14 @@ class SurveyManagement extends Component {
 
     this.ipcRenderer.on('getSurveyListResult', (event, res) => {
       if (!this.mounted) {
-        log('Survey Mgt Component Not Mounted, stopping getSurveyListResult result function'); 
-        return;
+        return log('Survey Mgt Component Not Mounted, stopping getSurveyListResult result function'); 
       }
 
       this.setLoading(false);
       log(res);
 
       if (!res.data){
-        return alert('Unexpected Error, please check the console to see the returned value');
+        return alert('Unexpected Error, please check the console to see the error');
       }else if (!res.data.GetSurveyListResult){
         return alert(res.data);
       }else{
@@ -130,15 +131,15 @@ class SurveyManagement extends Component {
 
     this.ipcRenderer.on('getOptOutsResult', (event, res) => {
       if (!this.mounted) {
-        log('Survey Mgt Component Not Mounted, stopping getOptOutsResult result function'); 
-        return;
+        return log('Survey Mgt Component Not Mounted, stopping getOptOutsResult result function');
       }
 
       this.setLoading(false);
       log(res);
+
       //Error handling
       if (!res.data){
-        return alert('Unexpected Error, please check the console to see the returned value');
+        return alert('Unexpected Error, please check the console to see the error');
       }else if (!res.data.GetOptOutsResult){
         if (res.data.GetOptOutsResult === ''){
           return alert('An empty response was returned, meaning there are no opt outs for this query.');
@@ -161,6 +162,7 @@ class SurveyManagement extends Component {
         item.Description = arr[i].match(/<Description>/) ? arr[i].split('<Description>')[1].split('</Description>')[0] : 'None';
         arr[i] = item;
       }
+
       log(arr);
       this.setState({
         optOutList: arr
@@ -169,20 +171,23 @@ class SurveyManagement extends Component {
 
     this.ipcRenderer.on('sendInvitationForNewRecipientsResult', (event, res) => {
       if (!this.mounted) {
-        log('Survey Mgt Component Not Mounted, stopping sendInvitationForNewRecipientsResult result function'); 
-        return;
+        return log('Survey Mgt Component Not Mounted, stopping sendInvitationForNewRecipientsResult result function');
       }
 
       log(res);
       this.setLoading(false);
+
       //Error handling
-      if (res.data.message){
+      if (!res.data || !res.data.SendInvitationForNewRecipientsResult){
+        return alert('Unexpected Error, please check the console to see the error');
+      }else if (res.data.message){
         return alert(res.data.message);
       }
+
       let result = JSON.parse(res.data.SendInvitationForNewRecipientsResult);
       if (result && result.Errors && result.Errors.length){
-        alert(JSON.stringify(result.Errors));
-        return alert('Error in sending the invite. Common causes: 1. Please make sure you are authenticated 2. Please make sure that this survey has an invite already built in the platform that it can send 3. Only one API call can be made per minute to send invites')
+        log(JSON.stringify(result.Errors));
+        return alert('Error in sending the invite. Common causes: 1. Please make sure you are authenticated 2. Please make sure that this survey has an invite already built in the platform that it can send 3. Only one API call can be made per minute to send invites. Check the console for more details.')
       }else{
         return alert('Success!')
       }
@@ -190,16 +195,18 @@ class SurveyManagement extends Component {
     
     this.ipcRenderer.on('getEmailListsBySurveyIdResult', (event, res) => {
       if (!this.mounted) {
-        log('Survey Mgt Component Not Mounted, stopping getEmailListsBySurveyIdResult result function'); 
-        return;
+        return log('Survey Mgt Component Not Mounted, stopping getEmailListsBySurveyIdResult result function');
       }
 
       log(res);
       this.setLoading(false);
-      if (res.data.GetEmailListsBySurveyIdResult.match('Error:')){
-        log(res);
+
+      if (!res.data || !res.data.GetEmailListsBySurveyIdResult){
+        return alert('Unexpected error. Please check the console for more details');
+      }else if (res.data.GetEmailListsBySurveyIdResult.match('Error:')){
         return alert('Error retrieving the email list. Check the console for more information');
       }
+
       let arr = res.data.GetEmailListsBySurveyIdResult.split('<EmailListId>');
       arr.shift();
       if (arr.length < 1){
@@ -215,7 +222,7 @@ class SurveyManagement extends Component {
         item.IsRolling = arr[i].match(/<IsRolling>/) ? arr[i].split('<IsRolling>')[1].split('</IsRolling>')[0] : 'None';
         arr[i] = item;
       }
-      log(arr);
+      
       this.setState({
         emailList: arr
       })
@@ -249,17 +256,40 @@ class SurveyManagement extends Component {
 
   authenticateUser(e){
     e.preventDefault();
-    log('authenticating user');
     var baseURL = this.state.baseURL[this.props.server];
-    // log(this.props);
+    let {company, username, password} = this.props;
+
+    // pre-request error handling
+    if (!company || !username || !password){
+      return alert('A valid username, password, and company name are required for this call.');
+    }
+
+    log('Authenticating User for response data');
+
+    // allows user to type shortcut company name and leave off the .allegiancetech.com
+    if (!company.match(/\./)){
+      company += '.allegiancetech.com';
+    }
+    // allows user to type shortcut email if they are a maritzcx employee
+    if (!username.match(/@/)){
+      username += '@maritzcx.com';
+    }
+
+    // puts the loading gif on the screen
     this.setLoading(true);
 
-    this.ipcRenderer.send(`/api/authenticate`, {
+    // this is all of the info we will need for the authenticate API call
+    let authenticateConfig = {
       "url": `${baseURL}/EmailImport.HttpService.svc/web/authenticate`,
-      "userName": this.props.username,
-      "password": this.props.password,
-      "companyName": this.props.company
-    })
+      "userName": username,
+      "password": password,
+      "companyName": company
+    }
+
+    // removes the user's password, then logs the config so we can check it in case of errors, 
+    // then sends the API request to the back end along with the config
+    log(JSON.stringify(authenticateConfig).replace(/"password":(.*)?\,/, '"password":"*******",'));
+    this.ipcRenderer.send('/api/authenticate', authenticateConfig);
   }
   
   getSurveyList(e){

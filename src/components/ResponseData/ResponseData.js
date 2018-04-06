@@ -65,7 +65,7 @@ class ResponseData extends Component {
     this.mounted = true;
     document.getElementById('username').focus();
     
-    //This sets the event listeners from responses from the back end
+    //This sets the event listeners for responses from the back end
     this.ipcRenderer.on('authenticateUserResult', (event, res) => {
       if (!this.mounted) {
         log('Response Data Component Not Mounted, stopping authenticateUserResult result function'); 
@@ -327,16 +327,40 @@ class ResponseData extends Component {
 
   authenticateUser(e){
     e.preventDefault();
-    log('Authenticating User for response data');
     var baseURL = this.state.baseURL[this.props.server];
+    let {company, username, password} = this.props;
+
+    // pre-request error handling
+    if (!company || !username || !password){
+      return alert('A valid username, password, and company name are required for this call.');
+    }
+
+    log('Authenticating User for response data');
+
+    // allows user to type shortcut company name and leave off the .allegiancetech.com
+    if (!company.match(/\./)){
+      company += '.allegiancetech.com';
+    }
+    // allows user to type shortcut email if they are a maritzcx employee
+    if (!username.match(/@/)){
+      username += '@maritzcx.com';
+    }
+
+    // puts the loading gif on the screen
     this.setLoading(true);
 
-    this.ipcRenderer.send('/api/authenticate', {
+    // this is all of the info we will need for the authenticate API call
+    let authenticateConfig = {
       "url": `${baseURL}/EmailImport.HttpService.svc/web/authenticate`,
-      "userName": this.props.username,
-      "password": this.props.password,
-      "companyName": this.props.company
-    })
+      "userName": username,
+      "password": password,
+      "companyName": company
+    }
+
+    // removes the user's password, then logs the config so we can check it in case of errors, 
+    // then sends the API request to the back end along with the config
+    log(JSON.stringify(authenticateConfig).replace(/"password":(.*)?\,/, '"password":"*******",'));
+    this.ipcRenderer.send('/api/authenticate', authenticateConfig);
   }
 
   getSurveyList(e){

@@ -176,8 +176,8 @@ h2{
 
 .console{
   width: 800px;
-  height: 500px;
-  overflow-y: scroll;
+  height: 510px;
+  overflow-y: hidden;
   overflow-x: hidden;
   position: fixed;
   top: calc(50% - 250px);
