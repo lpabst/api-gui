@@ -168,6 +168,11 @@ h2{
   box-shadow: inset 1px 1px 1px black;
 }
 
+.consoleMessage{
+  color: rgb(255, 123, 0);
+  text-align: center;
+}
+
 .console{
   width: 800px;
   height: 500px;

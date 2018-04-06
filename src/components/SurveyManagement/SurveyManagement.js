@@ -114,10 +114,12 @@ class SurveyManagement extends Component {
       }
 
       this.setLoading(false);
-      log(res)
+      log(res);
+
       if (!res.data.GetSurveyListResult){
         return alert(res.data);
       }
+      
       this.setState({
         surveyList: res.data.GetSurveyListResult
       })

@@ -11,8 +11,10 @@ class App extends Component {
     this.state={
       consoleOpen: false,
       showClearConsole: false,
+      consoleMessage: '',
     }
 
+    this.toggleShowConsole = this.toggleShowConsole.bind(this);
     this.toggleClearConsole = this.toggleClearConsole.bind(this);
     this.resetConsoleContent = this.resetConsoleContent.bind(this);
   }
@@ -27,6 +29,18 @@ class App extends Component {
       top: 0,
       left: 0,
       behavior: 'smooth'
+    })
+  }
+
+  toggleShowConsole(){
+    let consoleMessage = '';
+    if (window.consoleContent.length > 300000){
+      consoleMessage = 'Consider clearing the console for faster load times';
+    }
+
+    this.setState({
+      consoleOpen: !this.state.consoleOpen,
+      consoleMessage: consoleMessage
     })
   }
 
@@ -58,11 +72,11 @@ class App extends Component {
 
         { router }
 
-        <div className='consoleToggle' onClick={() => this.setState({consoleOpen: !this.state.consoleOpen})} > 
+        <div className='consoleToggle' onClick={() => this.toggleShowConsole()} > 
           Console
         </div>
 
-        { this.state.consoleOpen && 
+        { this.state.consoleOpen &&
           <div className='console'>
             <div className='consoleCloseX' onClick={() => this.setState({consoleOpen: false})} > X </div>
             <p className='consoleHeader' >Console Messages</p>
@@ -75,8 +89,10 @@ class App extends Component {
                 <button onClick={this.toggleClearConsole}>No</button>
               </span>
             }
+            <p className='consoleMessage'>{this.state.consoleMessage}</p>
           </div>
         }
+        
 
       </div>
     );

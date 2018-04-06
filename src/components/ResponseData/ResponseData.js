@@ -73,15 +73,15 @@ class ResponseData extends Component {
       }
 
       this.setLoading(false);
+      log(res);
+
       if (!res.data || !res.data.AuthenticateResult){
-        log(res);
         return alert('Error, no Auth token came back. Please check your spelling')
       }
       if (res.data.AuthenticateResult.match(/00000000/)){
-        log(res);
         alert('Authentication failed. Double check your username, password, and that the company you are trying to access exists on the platform you have selected.')
       }
-      log(res)
+
       this.setState({
         token: res.data.AuthenticateResult
       })
@@ -94,6 +94,7 @@ class ResponseData extends Component {
       }
 
       this.setLoading(false);
+      log(res);
       
       if (!res.data || !res.data.GetSurveyListResult){
         return alert(JSON.stringify(res));
