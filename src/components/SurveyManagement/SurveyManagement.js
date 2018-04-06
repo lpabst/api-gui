@@ -116,13 +116,16 @@ class SurveyManagement extends Component {
       this.setLoading(false);
       log(res);
 
-      if (!res.data.GetSurveyListResult){
+      if (!res.data){
+        return alert('Unexpected Error, please check the console to see the returned value');
+      }else if (!res.data.GetSurveyListResult){
         return alert(res.data);
+      }else{
+        this.setState({
+          surveyList: res.data.GetSurveyListResult
+        })
       }
       
-      this.setState({
-        surveyList: res.data.GetSurveyListResult
-      })
     })
 
     this.ipcRenderer.on('getOptOutsResult', (event, res) => {
@@ -132,16 +135,17 @@ class SurveyManagement extends Component {
       }
 
       this.setLoading(false);
-      log(res)
+      log(res);
       //Error handling
-      if (!res.data.GetOptOutsResult){
+      if (!res.data){
+        return alert('Unexpected Error, please check the console to see the returned value');
+      }else if (!res.data.GetOptOutsResult){
         if (res.data.GetOptOutsResult === ''){
           return alert('An empty response was returned, meaning there are no opt outs for this query.');
         }else{
           return alert(res.data);
         }
-      } 
-      if (res.data.GetOptOutsResult.match(/Error:/)){
+      }else if (res.data.GetOptOutsResult.match(/Error:/)){
         return alert(res.data.GetOptOutsResult);
       }
       
@@ -326,15 +330,18 @@ class SurveyManagement extends Component {
       recipients[i].PrepopData = prepop;
     }
 
-    log('Sending email invitations...');
-    this.ipcRenderer.send(`/api/sendInvitationForNewRecipients`, {
+    let sendInvitationConfig = {
       "url": `${this.baseURL}/HttpService.svc/web/sendInvitationForNewRecipients`,
       "token": this.state.token,
       "surveyId": this.state.surveyId,
       "recipients": recipients,
       "sampleDeDuplicationRule": this.state.deDupeLegend[this.state.deDupeRule],
       "sampleErrorHandlingRule": this.state.errorHandlingLegend[this.state.errorHandlingRule]
-    })
+    }
+
+    log('Sending email invitations...\n' + JSON.stringify(sendInvitationConfig));
+    
+    this.ipcRenderer.send(`/api/sendInvitationForNewRecipients`, sendInvitationConfig);
   }
 
   getEmailListsBySurveyId(e){
@@ -385,7 +392,7 @@ class SurveyManagement extends Component {
               <a rel='noopener noreferrer' href='https://developer.maritzcx.com/api/#cat-2' target='_blank' id='header_docs_link'>See The Docs</a>
               <h2>Survey Management API</h2>
 
-              <ComponentName token={this.state.token} surveyId={this.state.surveyId} sOptOutType={this.state.sOptOutType} filterXml={this.state.filterXml} surveyList={this.state.surveyList} deDupeRule={this.state.deDupeRule} errorHandlingRule={this.state.errorHandlingRule} recipients={this.state.recipients} prepopData={this.state.prepopData} updateState={this.updateState} authenticateUser = {this.authenticateUser} getSurveyList={this.getSurveyList} getOptOuts={this.getOptOuts} sendInvitationForNewRecipients={this.sendInvitationForNewRecipients} getEmailListsBySurveyId={this.getEmailListsBySurveyId} log={log} />
+              <ComponentName token={this.state.token} surveyId={this.state.surveyId} sOptOutType={this.state.sOptOutType} filterXml={this.state.filterXml} surveyList={this.state.surveyList} deDupeRule={this.state.deDupeRule} errorHandlingRule={this.state.errorHandlingRule} recipients={this.state.recipients} prepopData={this.state.prepopData} updateState={this.updateState} authenticateUser = {this.authenticateUser} getSurveyList={this.getSurveyList} getOptOuts={this.getOptOuts} sendInvitationForNewRecipients={this.sendInvitationForNewRecipients} getEmailListsBySurveyId={this.getEmailListsBySurveyId} />
 
           </div>
 
@@ -397,7 +404,7 @@ class SurveyManagement extends Component {
 
               <ul className='results'>
                   
-                <ResultsToShow token={this.state.token} surveyList={this.state.surveyList} optOutList={this.state.optOutList} emailList={this.state.emailList} invitationScheduleList={this.state.invitationScheduleList} reminderScheduleList={this.state.reminderScheduleList} log={log} />
+                <ResultsToShow token={this.state.token} surveyList={this.state.surveyList} optOutList={this.state.optOutList} emailList={this.state.emailList} invitationScheduleList={this.state.invitationScheduleList} reminderScheduleList={this.state.reminderScheduleList} />
                   
               </ul>
 

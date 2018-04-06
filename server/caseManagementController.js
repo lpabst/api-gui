@@ -5,7 +5,7 @@ module.exports = {
 
   getCaseView:  (event, arg) => {
     let { url, token, caseId } = arg;
-    console.log({ url, token, caseId })
+    
     requestify.post(url, {
       token: token,
       caseId: caseId
@@ -13,20 +13,17 @@ module.exports = {
     .then(
       function (response) {
         var data = response.getBody();
-        console.log(data);
         event.sender.send('getCaseViewResult', {data: data});
-        return console.log('done');
       },
       function (err) {
-        console.log(err);
-        return event.sender.send('getCaseViewResult', 'Error occurred. Please check that you are authenticated for the correct company and passing the correct authentication token.');
+        event.sender.send('getCaseViewResult', 'Error occurred. Please check that you are authenticated for the correct company and passing the correct authentication token. Full error: ' + JSON.stringify(err));
       }
     );
   },
 
   getMessages:  (event, arg) => {
     let { url, token, caseId } = arg;
-    console.log({ url, token, caseId })
+    
     requestify.post(url, {
       token: token,
       caseId: caseId
@@ -34,19 +31,17 @@ module.exports = {
     .then(
       function (response) {
         var data = response.getBody();
-        console.log(data);
-        return event.sender.send('getMessagesResult', {data: data});
+        event.sender.send('getMessagesResult', {data: data});
       },
       function (err) {
-        console.log(err);
-        return event.sender.send('getMessagesResult', 'Error occurred. Please check that you are authenticated for the correct company and passing the correct authentication token.');
+        event.sender.send('getMessagesResult', 'Error occurred. Please check that you are authenticated for the correct company and passing the correct authentication token. Full error: ' + JSON.stringify(err));
       }
     );
   },
 
   getUserList:  (event, arg) => {
     let { url, token, searchTerm, caseSensitiveSearch } = arg;
-    console.log({ url, token, searchTerm, caseSensitiveSearch });
+    
     requestify.post(url, {
       token: token,
       searchTerm: searchTerm,
@@ -55,12 +50,10 @@ module.exports = {
     .then(
       function (response) {
         var data = response.getBody();
-        console.log(data);
-        return event.sender.send('getUserListResult', {data: data});
+        event.sender.send('getUserListResult', {data: data});
       },
       function (err) {
-        console.log(err);
-        return event.sender.send('getUserListResult', 'Error in retrieving user list');
+        event.sender.send('getUserListResult', 'Error in retrieving user list. Full error: ' + JSON.stringify(err));
       }
     );
   },

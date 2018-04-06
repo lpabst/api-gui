@@ -53,7 +53,10 @@ class App extends Component {
   resetConsoleContent(){
     window.consoleContent = 'Console Messages Will Appear Here';
     window.consoleUpdated = false;
-    this.toggleClearConsole();
+    this.setState({
+      consoleMessage: '',
+      showClearConsole: false
+    })
   }
 
   render() {

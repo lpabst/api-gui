@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-
+import log from './../../../utils/log.js';
 
 class GetEmailListBySurveyIdResults extends Component {
   
@@ -9,7 +9,6 @@ class GetEmailListBySurveyIdResults extends Component {
   }
 
   render() {
-    log(this.props.emailList)
     return (
       <table style={{margin: '0 auto'}}>
         <tbody>

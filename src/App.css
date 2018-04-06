@@ -156,6 +156,7 @@ h2{
   line-height: 19px;
   cursor: pointer;
   background: #eee;
+  border: 1px solid gray;
   border-radius: 3px;
   position: fixed;
   bottom: 10px;
