@@ -16,23 +16,7 @@ import {updateReduxState} from './../../ducks/reducer.js';
 import {ipcRenderer, remote} from 'electron';
 
 // console.logs the messages, makes sure it's a string, then adds it to the app's console as well
-function log(message){
-  console.log(message);
-  if (typeof message !== 'string'){
-    message = JSON.stringify(message);
-  }
-
-  if (!window.consoleUpdated){
-    window.consoleContent = message;
-    window.consoleUpdated = true;
-  }else{
-    window.consoleContent += '\n' + message;
-  }
-
-  if (document.getElementById('consoleContent')){
-    document.getElementById('consoleContent').value = window.consoleContent;
-  }
-}
+import log from './../../utils/log.js';
 
 class ResponseData extends Component {
 
@@ -84,7 +68,7 @@ class ResponseData extends Component {
     //This sets the event listeners from responses from the back end
     this.ipcRenderer.on('authenticateUserResult', (event, res) => {
       if (!this.mounted) {
-        log(' Response Data Component Not Mounted, stopping authenticateUserResult result function'); 
+        log('Response Data Component Not Mounted, stopping authenticateUserResult result function'); 
         return;
       }
 
@@ -105,7 +89,7 @@ class ResponseData extends Component {
 
     this.ipcRenderer.on('getSurveyListResult', (event, res) => {
       if (!this.mounted) {
-        log(' Response Data Component Not Mounted, stopping getSurveyListResult result function'); 
+        log('Response Data Component Not Mounted, stopping getSurveyListResult result function'); 
         return;
       }
 
@@ -121,7 +105,7 @@ class ResponseData extends Component {
     
     this.ipcRenderer.on('getQuestionsBySurveyIdResult', (event, res) => {
       if (!this.mounted) {
-        log(' Response Data Component Not Mounted, stopping getQuestionsBySurveyIdResult result function'); 
+        log('Response Data Component Not Mounted, stopping getQuestionsBySurveyIdResult result function'); 
         return;
       }
 
@@ -162,7 +146,7 @@ class ResponseData extends Component {
 
     this.ipcRenderer.on('getAnswersBySurveyIdResult', (event, res) => {
       if (!this.mounted) {
-        log(' Response Data Component Not Mounted, stopping getAnswersBySurveyIdResult result function'); 
+        log('Response Data Component Not Mounted, stopping getAnswersBySurveyIdResult result function'); 
         return;
       }
 
@@ -203,7 +187,7 @@ class ResponseData extends Component {
     
     this.ipcRenderer.on('getResponsesBySurveyIdResult', (event, res) => {
       if (!this.mounted) {
-        log(' Response Data Component Not Mounted, stopping getResponsesBySurveyIdResult result function'); 
+        log('Response Data Component Not Mounted, stopping getResponsesBySurveyIdResult result function'); 
         return;
       }
 

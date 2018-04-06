@@ -13,23 +13,7 @@ import {updateReduxState} from './../../ducks/reducer.js';
 import {ipcRenderer, remote} from 'electron';
 
 // console.logs the messages, makes sure it's a string, then adds it to the app's console as well
-function log(message){
-  console.log(message);
-  if (typeof message !== 'string'){
-    message = JSON.stringify(message);
-  }
-
-  if (!window.consoleUpdated){
-    window.consoleContent = message;
-    window.consoleUpdated = true;
-  }else{
-    window.consoleContent += '\n' + message;
-  }
-
-  if (document.getElementById('consoleContent')){
-    document.getElementById('consoleContent').value = window.consoleContent;
-  }
-}
+import log from './../../utils/log.js';
 
 class CaseManagement extends Component {
 
@@ -87,7 +71,10 @@ class CaseManagement extends Component {
 
     //This sets the event listeners for the respones from the back end
     this.ipcRenderer.on('authenticateUserResult', (event, res) => {
-      if (!this.mounted) return;
+      if (!this.mounted) {
+        log('Response Data Component Not Mounted, stopping authenticateUserResult result function'); 
+        return;
+      }
 
       this.setLoading(false);
       if (!res.data || !res.data.AuthenticateResult){
@@ -102,21 +89,30 @@ class CaseManagement extends Component {
     })
     
     this.ipcRenderer.on('getCaseViewResult', (event, res) => {
-      if (!this.mounted) return;
+      if (!this.mounted) {
+        log('Response Data Component Not Mounted, stopping getCaseViewResult result function'); 
+        return;
+      }
       
       this.setLoading(false);
       log(res);
     })
 
     this.ipcRenderer.on('getMessagesResult', (event, res) => {
-      if (!this.mounted) return;
+      if (!this.mounted) {
+        log('Response Data Component Not Mounted, stopping getMessagesResult result function'); 
+        return;
+      }
       
       this.setLoading(false);
       log(res);
     })
     
     this.ipcRenderer.on('getUserListResult', (event, res) => {
-      if (!this.mounted) return;
+      if (!this.mounted) {
+        log('Response Data Component Not Mounted, stopping getUserListResult result function'); 
+        return;
+      }
       
       this.setLoading(false);
       log(res);

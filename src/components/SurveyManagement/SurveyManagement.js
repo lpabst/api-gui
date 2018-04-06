@@ -31,23 +31,7 @@ import {ipcRenderer, remote} from 'electron';
 import { prependOnceListener } from 'cluster';
 
 // console.logs the messages, makes sure it's a string, then adds it to the app's console as well
-function log(message){
-  console.log(message);
-  if (typeof message !== 'string'){
-    message = JSON.stringify(message);
-  }
-
-  if (!window.consoleUpdated){
-    window.consoleContent = message;
-    window.consoleUpdated = true;
-  }else{
-    window.consoleContent += '\n' + message;
-  }
-
-  if (document.getElementById('consoleContent')){
-    document.getElementById('consoleContent').value = window.consoleContent;
-  }
-}
+import log from './../../utils/log.js';
 
 class SurveyManagement extends Component {
 
@@ -104,7 +88,7 @@ class SurveyManagement extends Component {
     //This sets all of the event listeners for the results that come from the back end
     this.ipcRenderer.on('authenticateUserResult', (event, res) => {
       if (!this.mounted) {
-        log(' Survey Mgt Component Not Mounted, stopping authenticateUserResult result function'); 
+        log('Survey Mgt Component Not Mounted, stopping authenticateUserResult result function'); 
         return;
       }
 
@@ -125,7 +109,7 @@ class SurveyManagement extends Component {
 
     this.ipcRenderer.on('getSurveyListResult', (event, res) => {
       if (!this.mounted) {
-        log(' Survey Mgt Component Not Mounted, stopping getSurveyListResult result function'); 
+        log('Survey Mgt Component Not Mounted, stopping getSurveyListResult result function'); 
         return;
       }
 
@@ -141,7 +125,7 @@ class SurveyManagement extends Component {
 
     this.ipcRenderer.on('getOptOutsResult', (event, res) => {
       if (!this.mounted) {
-        log(' Survey Mgt Component Not Mounted, stopping getOptOutsResult result function'); 
+        log('Survey Mgt Component Not Mounted, stopping getOptOutsResult result function'); 
         return;
       }
 
@@ -179,7 +163,7 @@ class SurveyManagement extends Component {
 
     this.ipcRenderer.on('sendInvitationForNewRecipientsResult', (event, res) => {
       if (!this.mounted) {
-        log(' Survey Mgt Component Not Mounted, stopping sendInvitationForNewRecipientsResult result function'); 
+        log('Survey Mgt Component Not Mounted, stopping sendInvitationForNewRecipientsResult result function'); 
         return;
       }
 
@@ -200,7 +184,7 @@ class SurveyManagement extends Component {
     
     this.ipcRenderer.on('getEmailListsBySurveyIdResult', (event, res) => {
       if (!this.mounted) {
-        log(' Survey Mgt Component Not Mounted, stopping getEmailListsBySurveyIdResult result function'); 
+        log('Survey Mgt Component Not Mounted, stopping getEmailListsBySurveyIdResult result function'); 
         return;
       }
 
@@ -261,7 +245,7 @@ class SurveyManagement extends Component {
     e.preventDefault();
     log('authenticating user');
     var baseURL = this.state.baseURL[this.props.server];
-    log(this.props);
+    // log(this.props);
     this.setLoading(true);
 
     this.ipcRenderer.send(`/api/authenticate`, {
