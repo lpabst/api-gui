@@ -176,6 +176,10 @@ class CaseManagement extends Component {
 
     log('Authenticating User for case mgt');
 
+    // allows user to type 'gi' or 'test' for generalindustries
+    if (company === 'gi' || company === 'test'){
+      company = 'generalindustries.allegiancetech.com';
+    }
     // allows user to type shortcut company name and leave off the .allegiancetech.com
     if (!company.match(/\./)){
       company += '.allegiancetech.com';
