@@ -65,6 +65,11 @@ class ResponseData extends Component {
     this.mounted = true;
     document.getElementById('username').focus();
     
+    // if we have already authenticated during this session, grab the auth token from window
+    if (window.surveyAuthToken){
+      this.setState({token: window.surveyAuthToken});
+    }
+    
     //This sets the event listeners for responses from the back end
     this.ipcRenderer.on('authenticateUserResult', (event, res) => {
       if (!this.mounted) {
@@ -85,6 +90,8 @@ class ResponseData extends Component {
       this.setState({
         token: res.data.AuthenticateResult
       })
+
+      window.surveyAuthToken = res.data.AuthenticateResult;
     })
 
     this.ipcRenderer.on('getSurveyListResult', (event, res) => {
@@ -250,6 +257,10 @@ class ResponseData extends Component {
 
   componentWillUnmount(){
     this.mounted = false;
+    this.ipcRenderer.removeAllListeners('authenticateUserResult');
+    this.ipcRenderer.removeAllListeners('getQuestionsBySurveyIdResult');
+    this.ipcRenderer.removeAllListeners('getAnswersBySurveyIdResult');
+    this.ipcRenderer.removeAllListeners('getResponsesBySurveyIdResult');
   }
 
   changeForm(newForm){

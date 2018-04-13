@@ -68,6 +68,11 @@ class CaseManagement extends Component {
   componentDidMount(){
     window.scrollTo(0, 0);
     this.mounted = true;
+    
+    // if we have already authenticated during this session, grab the auth token from window
+    if (window.caseAuthToken){
+      this.setState({token: window.surveyAuthToken});
+    }
 
     //This sets the event listeners for the respones from the back end
     this.ipcRenderer.on('authenticateUserResult', (event, res) => {
@@ -86,6 +91,8 @@ class CaseManagement extends Component {
         authResult: res.data.AuthenticateResult,
         token: res.data.AuthenticateResult.token
       })
+
+      window.caseAuthToken = res.data.AuthenticateResult;
     })
     
     this.ipcRenderer.on('getCaseViewResult', (event, res) => {
@@ -132,6 +139,10 @@ class CaseManagement extends Component {
 
   componentWillUnmount(){
     this.mounted = false;
+    this.ipcRenderer.removeAllListeners('authenticateUserResult');
+    this.ipcRenderer.removeAllListeners('getCaseViewResult');
+    this.ipcRenderer.removeAllListeners('getMessagesResult');
+    this.ipcRenderer.removeAllListeners('getUserListResult');
   }
 
   changeForm(newVal){
@@ -156,14 +167,36 @@ class CaseManagement extends Component {
     e.preventDefault();
 
     var baseURL = this.state.baseURL[this.props.server];
+    let {company, username, password} = this.props;
+
+    // pre-request error handling
+    if (!company || !username || !password){
+      return alert('A valid username, password, and company name are required for this call.');
+    }
+
+    log('Authenticating User for case mgt');
+
+    // allows user to type shortcut company name and leave off the .allegiancetech.com
+    if (!company.match(/\./)){
+      company += '.allegiancetech.com';
+    }
+    // allows user to type shortcut email if they are a maritzcx employee
+    if (!username.match(/@/)){
+      username += '@maritzcx.com';
+    }
+    
+    // this is all of the info we will need for the authenticate API call
+    let authenticateConfig = {
+      "url": `${baseURL}/authenticate`,
+      "userName": username,
+      "password": password,
+      "companyName": company
+    }    
+
+    // puts the loading gif on the screen
     this.setLoading(true);
 
-    this.ipcRenderer.send(`/api/authenticate`, {
-      "url": `${baseURL}/authenticate`,
-      "userName": this.props.username,
-      "password": this.props.password,
-      "companyName": this.props.company
-    })
+    this.ipcRenderer.send(`/api/authenticate`, authenticateConfig);
   }
 
   getCaseView(e){

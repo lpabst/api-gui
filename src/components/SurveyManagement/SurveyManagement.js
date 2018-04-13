@@ -84,6 +84,11 @@ class SurveyManagement extends Component {
   componentDidMount(){
     window.scrollTo(0, 0);
     this.mounted = true;
+    
+    // if we have already authenticated during this session, grab the auth token from window
+    if (window.surveyAuthToken){
+      this.setState({token: window.surveyAuthToken});
+    }
 
     //This sets all of the event listeners for the results that come from the back end
     this.ipcRenderer.on('authenticateUserResult', (event, res) => {
@@ -103,10 +108,12 @@ class SurveyManagement extends Component {
       if (res.data.AuthenticateResult.match(/00000000/)){
         alert('Authentication failed. Double check your username, password, and that the company you are trying to access exists on the platform you have selected.');
       }
-      
+
       this.setState({
         token: res.data.AuthenticateResult
       })
+
+      window.surveyAuthToken = res.data.AuthenticateResult;
     })
 
     this.ipcRenderer.on('getSurveyListResult', (event, res) => {
@@ -231,6 +238,11 @@ class SurveyManagement extends Component {
 
   componentWillUnmount(){
     this.mounted = false;
+    this.ipcRenderer.removeAllListeners('authenticateUserResult');
+    this.ipcRenderer.removeAllListeners('getSurveyListResult');
+    this.ipcRenderer.removeAllListeners('getOptOutsResult');
+    this.ipcRenderer.removeAllListeners('sendInvitationForNewRecipientsResult');
+    this.ipcRenderer.removeAllListeners('getEmailListsBySurveyIdResult');
   }
   
   changeForm(newForm){
