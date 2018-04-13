@@ -67,7 +67,12 @@ class ResponseData extends Component {
     
     // if we have already authenticated during this session, grab the auth token from window
     if (window.surveyAuthToken){
-      this.setState({token: window.surveyAuthToken});
+      this.setState({ token: window.surveyAuthToken });
+    }
+
+    // if we already have a survey List on window, get it
+    if (window.surveyList){
+      this.setState({ surveyList: window.surveyList });
     }
     
     //This sets the event listeners for responses from the back end
@@ -92,6 +97,8 @@ class ResponseData extends Component {
       })
 
       window.surveyAuthToken = res.data.AuthenticateResult;
+      // any time the user re-authenticates, clear out the survey list in case it's a new company they authenticated for
+      window.surveyList = null;
     })
 
     this.ipcRenderer.on('getSurveyListResult', (event, res) => {
@@ -109,6 +116,8 @@ class ResponseData extends Component {
       this.setState({
         surveyList: res.data.GetSurveyListResult
       })
+
+      window.surveyList = res.data.GetSurveyListResult;
     })
     
     this.ipcRenderer.on('getQuestionsBySurveyIdResult', (event, res) => {
@@ -258,6 +267,7 @@ class ResponseData extends Component {
   componentWillUnmount(){
     this.mounted = false;
     this.ipcRenderer.removeAllListeners('authenticateUserResult');
+    this.ipcRenderer.removeAllListeners('getSurveyListResult');
     this.ipcRenderer.removeAllListeners('getQuestionsBySurveyIdResult');
     this.ipcRenderer.removeAllListeners('getAnswersBySurveyIdResult');
     this.ipcRenderer.removeAllListeners('getResponsesBySurveyIdResult');

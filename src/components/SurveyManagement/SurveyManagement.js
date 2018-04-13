@@ -89,6 +89,10 @@ class SurveyManagement extends Component {
     if (window.surveyAuthToken){
       this.setState({token: window.surveyAuthToken});
     }
+    // if we have already retrieved the survey List for this company, put it on state
+    if (window.surveyList){
+      this.setState({surveyList: window.surveyList});
+    }
 
     //This sets all of the event listeners for the results that come from the back end
     this.ipcRenderer.on('authenticateUserResult', (event, res) => {
@@ -114,6 +118,8 @@ class SurveyManagement extends Component {
       })
 
       window.surveyAuthToken = res.data.AuthenticateResult;
+      // any time the user re-authenticates, clear out the survey list in case it's a new company they authenticated for
+      window.surveyList = null;
     })
 
     this.ipcRenderer.on('getSurveyListResult', (event, res) => {
@@ -132,6 +138,8 @@ class SurveyManagement extends Component {
         this.setState({
           surveyList: res.data.GetSurveyListResult
         })
+        // save the surveyList to the window for future component mounts
+        window.surveyList = res.data.GetSurveyListResult;
       }
       
     })
