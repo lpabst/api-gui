@@ -380,7 +380,7 @@ class CaseManagement extends Component {
             <li onClick={ () => this.changeForm('getUserList') }>getUserList</li>
           </ul>
       
-          <a rel='noopener noreferrer' href='https://developer.maritzcx.com/api/#cat-4' target='_blank' id='header_docs_link'>See The Docs</a>
+          <a rel='noopener noreferrer' href='https://developer.maritzcx.com/api' target='_blank' id='header_docs_link'>See The Docs</a>
           <h2>Case Management API</h2>
 
           { formToShow }

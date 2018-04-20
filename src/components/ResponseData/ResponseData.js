@@ -669,7 +669,7 @@ class ResponseData extends Component {
             <li onClick={ () => this.changeForm('getResponsesBySurveyId') }>getResponsesBySurveyId</li>
           </ul>
 
-          <a rel='noopener noreferrer' href='https://developer.maritzcx.com/api/#cat-3' target='_blank' id='header_docs_link'>See The Docs</a>
+          <a rel='noopener noreferrer' href='https://developer.maritzcx.com/api' target='_blank' id='header_docs_link'>See The Docs</a>
           <h2>Response Data API</h2>
 
           { formToShow }

@@ -477,7 +477,7 @@ class SurveyManagement extends Component {
               </ul>
 
 
-              <a rel='noopener noreferrer' href='https://developer.maritzcx.com/api/#cat-2' target='_blank' id='header_docs_link'>See The Docs</a>
+              <a rel='noopener noreferrer' href='https://developer.maritzcx.com/api' target='_blank' id='header_docs_link'>See The Docs</a>
               <h2>Survey Management API</h2>
 
               <ComponentName token={this.state.token} surveyId={this.state.surveyId} sOptOutType={this.state.sOptOutType} filterXml={this.state.filterXml} surveyList={this.state.surveyList} deDupeRule={this.state.deDupeRule} errorHandlingRule={this.state.errorHandlingRule} recipients={this.state.recipients} prepopData={this.state.prepopData} updateState={this.updateState} authenticateUser = {this.authenticateUser} getSurveyList={this.getSurveyList} getOptOuts={this.getOptOuts} sendInvitationForNewRecipients={this.sendInvitationForNewRecipients} getEmailListsBySurveyId={this.getEmailListsBySurveyId} />
