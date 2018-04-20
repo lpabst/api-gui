@@ -14,7 +14,7 @@ class GetOptOuts extends Component {
 
     return (
       <form className='get_questions_byid' onSubmit={this.props.getOptOuts} >
-        <h4 style={{width: '100%', textAlign: 'center'}}>getResponsesBySurveyId</h4>
+        <h4 style={{width: '100%', textAlign: 'center'}}>getOptOuts</h4>
         <p>token:</p>
         <input placeholder='token' value={this.props.token} onChange={(e) => this.props.updateState(e, 'token')} />
         <p>sOptOutType:</p>

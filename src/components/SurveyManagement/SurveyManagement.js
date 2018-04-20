@@ -357,7 +357,7 @@ class SurveyManagement extends Component {
       return alert('If sOptOut type is set to "Survey", a valid surveyId must be provided.')
     }
 
-    let requestBody = {,
+    let requestBody = {
       "token": this.state.token,
       "sOptOutType": this.state.sOptOutType,
       "filterXml": this.state.filterXml,
@@ -407,7 +407,7 @@ class SurveyManagement extends Component {
       recipients[i].PrepopData = prepop;
     }
 
-    let sendInvitationConfig = {,
+    let sendInvitationConfig = {
       "token": this.state.token,
       "surveyId": this.state.surveyId,
       "recipients": recipients,
