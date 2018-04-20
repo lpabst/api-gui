@@ -167,6 +167,7 @@ class CaseManagement extends Component {
     e.preventDefault();
 
     var baseURL = this.state.baseURL[this.props.server];
+    let requestUrl = `${baseURL}/authenticate`;
     let {company, username, password} = this.props;
 
     // pre-request error handling
@@ -191,11 +192,15 @@ class CaseManagement extends Component {
     
     // this is all of the info we will need for the authenticate API call
     let authenticateConfig = {
-      "url": `${baseURL}/authenticate`,
       "userName": username,
       "password": password,
       "companyName": company
     }    
+
+    log(`POST request to URL: ${requestUrl}\n
+    body/payload: ${JSON.stringify(authenticateConfig).replace(/"password":(.*)?\,/, '"password":"*******",')}`);
+
+    authenticateConfig.url = requestUrl;
 
     // puts the loading gif on the screen
     this.setLoading(true);
@@ -233,15 +238,22 @@ class CaseManagement extends Component {
     e.preventDefault();
 
     var baseURL = this.state.baseURL[this.props.server];
+    let requestUrl = `${baseURL}/getUserList`;
     let caseSensitiveSearch = (this.state.caseSensitiveSearch === 'Yes') ? true : false
     this.setLoading(true);
 
-    this.ipcRenderer.send(`/api/getUserList`, {
-      "url": `${baseURL}/getUserList`,
+    let requestBody = {
       "token": this.state.token,
       "searchTerm": this.state.searchTerm,
       "caseSensitiveSearch": caseSensitiveSearch
-    })
+    }
+
+    log(`POST request to URL: ${requestUrl}\n
+    body/payload: ${JSON.stringify(requestBody)}`);
+
+    requestBody.url = requestUrl;
+
+    this.ipcRenderer.send(`/api/getUserList`, requestBody);
   }
 
   render() {
