@@ -349,6 +349,7 @@ class ResponseData extends Component {
   authenticateUser(e){
     e.preventDefault();
     var baseURL = this.state.baseURL[this.props.server];
+    let requestUrl = `${baseURL}/EmailImport.HttpService.svc/web/authenticate`;
     let {company, username, password} = this.props;
 
     // pre-request error handling
@@ -356,7 +357,7 @@ class ResponseData extends Component {
       return alert('A valid username, password, and company name are required for this call.');
     }
 
-    log('Authenticating User for response data');
+    log('Authenticating User for response data.');
 
     // allows user to type 'gi' or 'test' for generalindustries
     if (company === 'gi' || company === 'test'){
@@ -376,7 +377,6 @@ class ResponseData extends Component {
 
     // this is all of the info we will need for the authenticate API call
     let authenticateConfig = {
-      "url": `${baseURL}/EmailImport.HttpService.svc/web/authenticate`,
       "userName": username,
       "password": password,
       "companyName": company
@@ -384,7 +384,11 @@ class ResponseData extends Component {
 
     // removes the user's password, then logs the config so we can check it in case of errors, 
     // then sends the API request to the back end along with the config
-    log(JSON.stringify(authenticateConfig).replace(/"password":(.*)?\,/, '"password":"*******",'));
+    log(`POST request to URL: ${requestUrl}\n
+    body/payload: ${JSON.stringify(authenticateConfig).replace(/"password":(.*)?\,/, '"password":"*******",')}`);
+
+    authenticateConfig.url = requestUrl;
+
     this.ipcRenderer.send('/api/authenticate', authenticateConfig);
   }
 
@@ -392,12 +396,19 @@ class ResponseData extends Component {
     e.preventDefault();
     log('GetSurveyList sent for response data');
     var baseURL = this.state.baseURL[this.props.server];
+    let requestUrl = `${baseURL}/EmailImport.HttpService.svc/web/getSurveyList`;
     this.setLoading(true);
 
-    this.ipcRenderer.send(`/api/getSurveyList`, {
-      "url": `${baseURL}/EmailImport.HttpService.svc/web/getSurveyList`,
+    let requestBody = {
       "token": this.state.token
-    })
+    };
+
+    log(`POST request to URL: ${requestUrl}\n
+    body/paylod:${JSON.stringify(requestBody)}`);
+
+    requestBody.url = requestUrl;
+
+    this.ipcRenderer.send(`/api/getSurveyList`, requestBody);
   }
 
   getQuestionsBySurveyId(e){
