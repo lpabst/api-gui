@@ -277,6 +277,7 @@ class SurveyManagement extends Component {
 
   authenticateUser(e){
     e.preventDefault();
+    
     var baseURL = this.state.baseURL[this.props.server];
     let requestUrl = `${baseURL}/EmailImport.HttpService.svc/web/authenticate`;
     let {company, username, password} = this.props;
@@ -323,7 +324,8 @@ class SurveyManagement extends Component {
   
   getSurveyList(e){
     e.preventDefault();
-    log('GetSurveyList sent.')
+    log('GetSurveyList sent.');
+
     var baseURL = this.state.baseURL[this.props.server];
     let requestUrl = `${baseURL}/EmailImport.HttpService.svc/web/getSurveyList`;
     this.setLoading(true);
@@ -342,8 +344,10 @@ class SurveyManagement extends Component {
 
   getOptOuts(e){
     e.preventDefault();
-    log('getOptOuts sent')
+    log('getOptOuts sent');
+
     var baseURL = this.state.baseURL[this.props.server];
+    let requestUrl = `${baseURL}/EmailImport.HttpService.svc/web/GetOptOuts`;
 
     //This ensures that if the user checks opt outs for the site/domain, no surveyId is passed
     let surveyId = this.state.sOptOutType === 'Survey' ? this.state.surveyId : null
@@ -352,21 +356,28 @@ class SurveyManagement extends Component {
     if (this.state.sOptOutType === 'Survey' && (!this.state.surveyId || Number(this.state.surveyId) <= 0)){
       return alert('If sOptOut type is set to "Survey", a valid surveyId must be provided.')
     }
-    
-    this.setLoading(true);
-    this.ipcRenderer.send(`/api/getOptOuts`, {
-      "url": `${baseURL}/EmailImport.HttpService.svc/web/GetOptOuts`,
+
+    let requestBody = {,
       "token": this.state.token,
       "sOptOutType": this.state.sOptOutType,
       "filterXml": this.state.filterXml,
       "surveyId": surveyId
-    })
+    };
+
+    log(`POST request to URL: ${requestUrl}\n
+    body/payload: ${JSON.stringify(requestBody)}`);
+
+    requestBody.url = requestUrl;
+    
+    this.setLoading(true);
+    this.ipcRenderer.send(`/api/getOptOuts`, requestBody);
   }
 
   sendInvitationForNewRecipients(e){
     e.preventDefault();
+
     var baseURL = this.state.baseURL[this.props.server];
-    this.baseURL = baseURL;
+    let requestUrl = `${baseURL}/HttpService.svc/web/sendInvitationForNewRecipients`;
     
     //pre-error handling
     if (this.state.recipients.length < 1){
@@ -396,8 +407,7 @@ class SurveyManagement extends Component {
       recipients[i].PrepopData = prepop;
     }
 
-    let sendInvitationConfig = {
-      "url": `${this.baseURL}/HttpService.svc/web/sendInvitationForNewRecipients`,
+    let sendInvitationConfig = {,
       "token": this.state.token,
       "surveyId": this.state.surveyId,
       "recipients": recipients,
@@ -405,7 +415,11 @@ class SurveyManagement extends Component {
       "sampleErrorHandlingRule": this.state.errorHandlingLegend[this.state.errorHandlingRule]
     }
 
-    log('Sending email invitations...\n' + JSON.stringify(sendInvitationConfig));
+    log(`Sending email invitations...\n
+    POST request to URL: ${requestUrl}\n
+    body/payload: ${JSON.stringify(sendInvitationConfig)}`);
+
+    sendInvitationConfig.url = requestUrl;
     
     this.ipcRenderer.send(`/api/sendInvitationForNewRecipients`, sendInvitationConfig);
   }
@@ -413,15 +427,23 @@ class SurveyManagement extends Component {
   getEmailListsBySurveyId(e){
     e.preventDefault();
     log('Getting email list for survey# ' + this.state.surveyId);
+
     var baseURL = this.state.baseURL[this.props.server];
+    let requestUrl = `${baseURL}/EmailImport.HttpService.svc/web/getEmailListsBySurveyId`;
     this.setLoading(true);
 
-    this.ipcRenderer.send(`/api/getEmailListsBySurveyId`, {
-      "url": `${baseURL}/EmailImport.HttpService.svc/web/getEmailListsBySurveyId`,
+    let requestBody = {
       "token": this.state.token,
       "surveyId": this.state.surveyId,
       "filterXml": this.state.filterXml
-    })
+    }
+
+    log(`POST request to URL: ${requestUrl}\n
+    body/payload: ${JSON.stringify(requestBody)}`);
+
+    requestBody.url = requestUrl;
+
+    this.ipcRenderer.send(`/api/getEmailListsBySurveyId`, requestBody);
   }
   
   render() {

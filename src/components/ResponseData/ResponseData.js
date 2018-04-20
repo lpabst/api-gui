@@ -348,6 +348,7 @@ class ResponseData extends Component {
 
   authenticateUser(e){
     e.preventDefault();
+
     var baseURL = this.state.baseURL[this.props.server];
     let requestUrl = `${baseURL}/EmailImport.HttpService.svc/web/authenticate`;
     let {company, username, password} = this.props;
@@ -395,6 +396,7 @@ class ResponseData extends Component {
   getSurveyList(e){
     e.preventDefault();
     log('GetSurveyList sent for response data');
+
     var baseURL = this.state.baseURL[this.props.server];
     let requestUrl = `${baseURL}/EmailImport.HttpService.svc/web/getSurveyList`;
     this.setLoading(true);
@@ -414,29 +416,46 @@ class ResponseData extends Component {
   getQuestionsBySurveyId(e){
     e.preventDefault();
     log('getQuestionsBySurveyId sent');
+    
     var baseURL = this.state.baseURL[this.props.server];
+    let requestUrl = `${baseURL}/EmailImport.HttpService.svc/web/getQuestionsBySurveyId`;
     this.setLoading(true);
 
-    this.ipcRenderer.send(`/api/getQuestionsBySurveyId`, {
-      "url": `${baseURL}/EmailImport.HttpService.svc/web/getQuestionsBySurveyId`,
+    let requestBody = {
       "token": this.state.token,
       "surveyId": this.state.surveyId,
       "filterXml": this.state.filterXml
-    })
+    }
+
+    
+    log(`POST request to URL: ${requestUrl}\n
+    body/payload: ${JSON.stringify(requestBody)}`);
+
+    requestBody.url = requestUrl;
+
+    this.ipcRenderer.send(`/api/getQuestionsBySurveyId`, requestBody);
   }
 
   getAnswersBySurveyId(e){
     e.preventDefault();
     log('getAnswersBySurveyId sent');
+
     var baseURL = this.state.baseURL[this.props.server];
+    let requestUrl = `${baseURL}/EmailImport.HttpService.svc/web/getAnswersBySurveyId`;
     this.setLoading(true);
     
-    this.ipcRenderer.send(`/api/getAnswersBySurveyId`, {
-      "url": `${baseURL}/EmailImport.HttpService.svc/web/getAnswersBySurveyId`,
+    let requestBody = {
       "token": this.state.token,
       "surveyId": this.state.surveyId,
       "filterXml": this.state.filterXml
-    })
+    }
+    
+    log(`POST request to URL: ${requestUrl}\n
+    body/payload: ${JSON.stringify(requestBody)}`);
+
+    requestBody.url = requestUrl;
+
+    this.ipcRenderer.send(`/api/getAnswersBySurveyId`, requestBody);
   }
 
   getResponsesBySurveyId(e){
@@ -446,16 +465,25 @@ class ResponseData extends Component {
     if (this.state.xmlBoxToShow == 'easy'){
       return this.updateXML(this.getResponsesBySurveyId);
     }
+
     log('getResponsesBySurveyId sent');
+
     var baseURL = this.state.baseURL[this.props.server];
+    let requestUrl = `${baseURL}/EmailImport.HttpService.svc/web/getResponsesBySurveyId`;
     this.setLoading(true);
     
-    this.ipcRenderer.send(`/api/getResponsesBySurveyId`, {
-      "url": `${baseURL}/EmailImport.HttpService.svc/web/getResponsesBySurveyId`,
+    let requestBody = {
       "token": this.state.token,
       "surveyId": this.state.surveyId,
       "filterXml": this.state.filterXml
-    })
+    }
+    
+    log(`POST request to URL: ${requestUrl}\n
+    body/payload: ${JSON.stringify(requestBody)}`);
+
+    requestBody.url = requestUrl;
+
+    this.ipcRenderer.send(`/api/getResponsesBySurveyId`, requestBody);
   }
 
   render() {
